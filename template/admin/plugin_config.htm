@@ -46,4 +46,20 @@
     配置字段由插件自身的 <code>info()['fields']</code> 定义。新增字段后重新保存即可生效。
   </div>
 </div>
+
+{if $type == 'integration'}
+<div class="card" style="max-width:760px;margin-top:16px">
+  <div class="card-title"><h3>对接操作</h3><span class="small muted">出站调用</span></div>
+  {if !empty($info.note)}<p class="small muted">{$info.note}</p>{/if}
+  <div class="flex" style="flex-wrap:wrap">
+    <form method="post" action="{admin_url('/plugin/' . $type . '/' . $name . '/test')}">
+      {csrf}<button class="btn" type="submit">测试连接</button>
+    </form>
+    <form method="post" action="{admin_url('/plugin/' . $type . '/' . $name . '/sync')}">
+      {csrf}<button class="btn" type="submit">从远端拉取客户</button>
+    </form>
+  </div>
+  <p class="small muted" style="margin:12px 0 0">对方调用本系统时，使用上方说明中的入站地址与密钥；本系统调用对方时，使用当前配置的出站地址。</p>
+</div>
+{/if}
 {include footer}

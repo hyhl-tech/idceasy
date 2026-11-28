@@ -15,6 +15,7 @@ plugins/
 ├── Registrar.php          注册商基类（框架文件）
 ├── Gateway.php            支付网关基类（框架文件）
 ├── Server.php             服务器模块基类（框架文件）
+├── Integration.php        对接插件基类（框架文件）
 ├── PluginBase.php         通用插件基类（框架文件）
 ├── Http.php               HTTP 客户端 trait（框架文件）
 ├── registrar/
@@ -23,6 +24,8 @@ plugins/
 │   └── your_gateway.php
 ├── server/
 │   └── your_server.php
+├── integration/
+│   └── your_bridge.php
 └── addon/
     └── your_addon.php
 ```
@@ -99,8 +102,8 @@ public function register(string $domain, int $years, array $contact, array $ns =
 返回约定：
 
 ```php
-// 查询
-['ok' => true, 'available' => true, 'premium' => false, 'price' => 12.50]
+// 查询（price 为你的上游成本价，currency 不填则按注册商默认货币）
+['ok' => true, 'available' => true, 'premium' => false, 'price' => 12.50, 'currency' => 'USD']
 ['ok' => false, 'error' => '注册商返回的错误']
 
 // 注册
@@ -208,6 +211,7 @@ return new class extends \plugins\Registrar {
 - 金额字段注意单位（分/元、微单位）
 - 时间统一转换为 `Y-m-d H:i:s`
 - 幂等：同一个域名重复注册时返回已有记录而不是报错
+- 比价依赖 `price` + `currency`：返回成本价，系统负责汇率换算与加价；不要把售价写进 `price`
 
 ---
 
@@ -519,6 +523,71 @@ $cfg = \think\Plugin::config('addon', 'your_addon');
 ```php
 $registrar = \think\Plugin::make('registrar', 'namesilo', $config);
 ```
+
+---
+
+### 6.4 对接插件（integration）
+
+用于和 WHMCS、魔方财务或自研财务系统双向同步。与 addon 的区别：
+
+- 有独立的配置页、测试连接与「从远端拉取」按钮
+- 启用时会执行 `boot()`，可以注册钩子
+- 入站由 API 控制器负责，出站由插件负责
+
+基类：`plugins\Integration`
+
+```php
+public function test(): array;                 // ['ok'=>true,'msg'=>'连接成功']
+public function pull(): array;                 // ['ok'=>true,'msg'=>'...','created'=>3,'skipped'=>1]
+public function push(array $user): array;      // 推送单个客户
+public function stats(): array;                // 可选，配置页展示
+public function boot(): void;                  // 可选，注册钩子
+```
+
+`info()['note']` 会显示在配置页顶部，建议写清入站地址与密钥位置。
+
+```php
+<?php
+return new class extends \plugins\Integration {
+    public function info(): array
+    {
+        return [
+            'id' => 'my_bridge', 'title' => '我的财务系统', 'version' => '1.0',
+            'description' => '客户双向同步',
+            'note' => '入站：POST /api/cube',
+            'fields' => [
+                ['name' => 'api_url', 'label' => '对方地址', 'type' => 'text', 'required' => true],
+                ['name' => 'key', 'label' => '密钥', 'type' => 'password', 'required' => true],
+            ],
+        ];
+    }
+
+    public function test(): array
+    {
+        return ['ok' => true, 'msg' => '连接成功'];
+    }
+
+    public function pull(): array
+    {
+        // 调用对方接口，写入 ice_user，跳过已存在邮箱
+        return ['ok' => true, 'msg' => '完成', 'created' => 0, 'skipped' => 0];
+    }
+
+    public function boot(): void
+    {
+        \think\Plugin::listen('user.registered', function ($data) {
+            // 新用户推送到对方
+        });
+    }
+};
+```
+
+内置实现：
+
+| 插件 | 出站 | 入站 |
+|---|---|---|
+| `integration/whmcs` | WHMCS API 拉取 / 推送客户 | `POST /api/whmcs` |
+| `integration/cubecp` | Bridge v1 拉取 / 推送客户 | `POST /api/cube` |
 
 ---
 

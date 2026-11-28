@@ -12,7 +12,7 @@
             <div class="cart-item">
               <div>
                 <div style="font-weight:600;color:var(--ink)">{$item.name}</div>
-                <div class="small muted">{if $item.type == 'domain'}{$item.cycle_text}{else}{$item.cycle_text} × {$item.qty}{/if}{if $item.domain} · {$item.domain}{/if}</div>
+                <div class="small muted">{if $item.type == 'domain' || $item.type == 'transfer'}{$item.cycle_text}{else}{$item.cycle_text} × {$item.qty}{/if}{if $item.domain} · {$item.domain}{/if}</div>
               </div>
               <div style="font-weight:600">{money($item.amount)}</div>
             </div>

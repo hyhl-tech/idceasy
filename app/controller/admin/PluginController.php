@@ -16,7 +16,8 @@ class PluginController extends Base
     {
         $types = [
             'registrar' => '域名注册商', 'gateway' => '支付网关',
-            'server' => '服务器 / 主机模块', 'addon' => '扩展插件（钩子）',
+            'server' => '服务器 / 主机模块', 'integration' => '对接（财务 / 面板）',
+            'addon' => '扩展插件（钩子）',
         ];
         $data = array_fill_keys(array_keys($types), []);
         foreach ($types as $type => $label) {
@@ -82,8 +83,10 @@ class PluginController extends Base
         $this->validate($type, $name);
         if (!$this->request->isPost()) return $this->redirect(admin_url('/plugins'));
         if ($type === 'addon') return $this->success('扩展插件随请求加载，无需单独测试');
+        if (!in_array($type, ['registrar', 'gateway', 'server', 'integration'], true)) return $this->error('不支持的插件类型');
         $record = Plugin::record($type, $name);
-        if (!$record) return $this->error('请先保存配置并启用插件');
+        $back = admin_url('/plugin/' . $type . '/' . $name);
+        if (!$record) return $this->error('请先保存配置并启用插件', $back);
         try {
             $plugin = Plugin::make($type, $name, json_decode((string)$record['config'], true) ?: []);
             $res = $plugin->test();
@@ -91,7 +94,30 @@ class PluginController extends Base
             $res = ['ok' => false, 'error' => $e->getMessage()];
         }
         $this->logAction('测试插件', ['type' => $type, 'name' => $name, 'result' => $res]);
-        return !empty($res['ok']) ? $this->success($res['msg'] ?? '测试通过') : $this->error($res['error'] ?? '测试失败');
+        return !empty($res['ok'])
+            ? $this->success($res['msg'] ?? '测试通过', $back)
+            : $this->error($res['error'] ?? '测试失败', $back);
+    }
+
+    /** 对接插件：从远端拉取数据 */
+    public function sync(string $type, string $name): Response
+    {
+        $this->validate($type, $name);
+        if ($type !== 'integration' || !$this->request->isPost()) {
+            return $this->error('不支持的操作');
+        }
+        $record = Plugin::record($type, $name);
+        $back = admin_url('/plugin/' . $type . '/' . $name);
+        if (!$record || (int)$record['status'] !== 1) return $this->error('请先保存配置并启用该对接', $back);
+        try {
+            $plugin = Plugin::make($type, $name, json_decode((string)$record['config'], true) ?: []);
+            $res = $plugin->pull();
+        } catch (\Throwable $e) {
+            return $this->error('同步失败：' . $e->getMessage(), $back);
+        }
+        $this->logAction('对接同步', ['type' => $type, 'name' => $name, 'result' => $res['msg'] ?? '']);
+        if (empty($res['ok'])) return $this->error($res['error'] ?? '同步失败', $back);
+        return $this->success($res['msg'] ?? '同步完成', $back);
     }
 
     protected function validate(string $type, string $name): void

@@ -15,9 +15,9 @@
         {loop $items as $item}
         <div class="cart-item">
           <div>
-            <div style="font-weight:600;color:var(--ink)">{$item.name}</div>
+            <div style="font-weight:600;color:var(--ink)">{$item.name}{if $item.type == 'transfer'} <span class="badge warn">转入</span>{/if}</div>
             <div class="small muted" style="margin-top:2px">
-              {if $item.type == 'domain'}
+              {if $item.type == 'domain' || $item.type == 'transfer'}
               注册年限：{$item.cycle_text}
               {else}
               周期：{$item.cycle_text}
@@ -30,7 +30,7 @@
           <div style="text-align:right">
             <div style="font-weight:700;color:var(--ink);margin-bottom:8px">{money($item.amount)}</div>
             <div class="flex" style="justify-content:flex-end;gap:6px">
-              {if $item.type != 'domain'}
+              {if $item.type != 'domain' && $item.type != 'transfer'}
               <form method="post" action="{url('/cart/update')}" class="flex" style="gap:4px">
                 {csrf}
                 <input type="hidden" name="key" value="{$item.key}">

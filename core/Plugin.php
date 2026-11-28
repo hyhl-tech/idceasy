@@ -8,7 +8,7 @@ namespace think;
 
 class Plugin
 {
-    public const TYPES = ['registrar', 'gateway', 'server', 'addon'];
+    public const TYPES = ['registrar', 'gateway', 'server', 'integration', 'addon'];
 
     protected static array $instances = [];
     protected static array $discovered = [];
@@ -41,6 +41,15 @@ class Plugin
                 }
             } catch (\Throwable $e) {
                 log_write('plugin', '加载插件失败: ' . $row['name'] . ' - ' . $e->getMessage());
+            }
+        }
+        foreach ($records as $row) {
+            if ($row['type'] !== 'integration' || (int)$row['status'] !== 1) continue;
+            try {
+                $obj = self::make('integration', $row['name'], self::config('integration', $row['name']));
+                if (method_exists($obj, 'boot')) $obj->boot();
+            } catch (\Throwable $e) {
+                log_write('plugin', '加载对接插件失败: ' . $row['name'] . ' - ' . $e->getMessage());
             }
         }
     }

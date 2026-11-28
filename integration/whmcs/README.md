@@ -42,12 +42,14 @@ idceasy 同时提供「服务端 API」与「WHMCS 服务器模块」，形成�
 
 ## 四、双向同步插件
 
-后台「插件 - 扩展插件」启用 `WHMCS 双向同步`，填写：
+后台「插件 - 对接（财务 / 面板）」启用 `WHMCS 双向对接`，填写：
 
-- WHMCS 地址
+- WHMCS 地址（不要带 `/includes/api.php`）
 - Identifier / Secret
-- 拉取客户：开启后，计划任务会调用 WHMCS `GetClients`，把缺失客户导入 idceasy
-- 推送新用户：开启后，idceasy 新注册用户会调用 WHMCS `AddClient`
+- 计划任务自动拉取客户：开启后，`cron.run` 会调用 `GetClients`，把缺失客户导入 idceasy
+- 新用户自动推送：开启后，`user.registered` 会调用 `AddClient`
+
+保存后可直接点「测试连接」与「从远端拉取客户」，结果会回到当前配置页。
 
 注意：
 

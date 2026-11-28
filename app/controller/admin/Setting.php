@@ -120,8 +120,12 @@ class Setting extends Base
                 ['name' => 'ticket_auto_close_days', 'label' => '工单自动关闭（天）', 'type' => 'number'],
             ]],
             'domain' => ['title' => '域名设置', 'icon' => 'globe', 'fields' => [
-                ['name' => 'domain_default_registrar', 'label' => '默认注册商', 'type' => 'select', 'options' => $registrars],
-                ['name' => 'domain_markup', 'label' => '溢价域名加价（%）', 'type' => 'number'],
+                ['name' => 'domain_default_registrar', 'label' => '默认注册商', 'type' => 'select', 'options' => $registrars,
+                    'help' => 'TLD 未单独绑定注册商时使用。'],
+                ['name' => 'domain_compare', 'label' => '启用多上游比价', 'type' => 'checkbox',
+                    'help' => '开启后，查询会同时询问已启用的注册商，按成本价 + 加价生成售价，并自动选择最低成本下单。最多比较 3 家，避免查询过慢。'],
+                ['name' => 'domain_markup', 'label' => '比价加价（%）', 'type' => 'number',
+                    'help' => '仅在比价开启且上游返回价格时生效。填 15 表示按成本加价 15%。'],
             ]],
             'api' => ['title' => '接口与自动化', 'icon' => 'plug', 'fields' => [
                 ['name' => 'api_whmcs_enabled', 'label' => '启用 WHMCS 兼容 API', 'type' => 'checkbox'],

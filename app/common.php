@@ -306,7 +306,7 @@ function cart_save(array $items): void
 function cart_add(array $item): string
 {
     $item += ['qty' => 1, 'options' => [], 'domain' => '', 'cycle' => 'monthly', 'type' => 'product'];
-    $key = substr(md5($item['type'] . '|' . ($item['product_id'] ?? 0) . '|' . ($item['domain'] ?? '') . '|' . ($item['cycle'] ?? '') . '|' . json_encode($item['options'] ?? [])), 0, 12);
+    $key = substr(md5($item['type'] . '|' . ($item['product_id'] ?? 0) . '|' . ($item['domain'] ?? '') . '|' . ($item['cycle'] ?? '') . '|' . ($item['registrar'] ?? '') . '|' . ($item['auth_code'] ?? '') . '|' . json_encode($item['options'] ?? [])), 0, 12);
     $items = cart();
     if (isset($items[$key])) $items[$key]['qty'] += (int)$item['qty'];
     else $items[$key] = $item + ['key' => $key];
@@ -376,10 +376,8 @@ function nav_menu(): array
         foreach (Db::table('product_group')->where('hidden', 0)->order('sort')->select() as $g) {
             $menu[] = ['title' => $g['name'], 'url' => url('/products', ['group' => $g['id']])];
         }
-        $menu[] = ['title' => '域名注册', 'url' => url('/domain')];
-        foreach (Db::table('page')->where('status', 1)->order('id')->select() as $p) {
-            $menu[] = ['title' => $p['title'], 'url' => url('/page/' . $p['slug'])];
-        }
+        $menu[] = ['title' => '域名注册', 'url' => url('/domains')];
+        // 单页放在页脚，避免顶部导航过长
         $menu[] = ['title' => '帮助中心', 'url' => url('/kb')];
         $menu[] = ['title' => '公告', 'url' => url('/announcements')];
     } catch (\Throwable $e) {}

@@ -21,9 +21,12 @@ idceasy 把客户、产品、订单、账单、域名、主机、工单、插件
 
 **域名**
 
+- 独立的注册商门户 `/domains`：搜索、后缀价格、注册、转入、我的域名；`/domain` 仅作兼容跳转
 - 21 家注册商插件：NameSilo、Namecheap、Name.com、Porkbun、Dynadot、GoDaddy/WildWest、eNom、Internet.bs、Openprovider、Gandi、OVHcloud、OpenSRS、DomainNameAPI、阿里云、腾讯云、REG.RU、Hexonet、RRPproxy、ResellerClub、ResellBiz、NetEarthOne
+- 多上游比价开关：各家报价按汇率换算后加价，自动选择最低成本下单；最多比较 3 家
 - 实时查询、注册、续费、转入、EPP、NS 修改、转移锁、隐私保护、状态同步
 - TLD 独立定价、溢价域名提示、到期提醒与自动续费账单
+- 详细设计见 [docs/DOMAIN.md](docs/DOMAIN.md)
 
 **主机与服务器**
 
@@ -40,8 +43,9 @@ idceasy 把客户、产品、订单、账单、域名、主机、工单、插件
 
 **开放与集成**
 
-- WHMCS 兼容 API（服务端），配套 WHMCS 服务器模块（客户端）
-- 魔方财务桥接 API（Bridge v1），配套 PHP 客户端
+- WHMCS 双向对接：入站 `/api/whmcs` + 服务器模块，出站「对接」插件可拉取/推送客户
+- 魔方财务 Bridge v1 双向对接：入站 `/api/cube` + PHP 客户端，出站「对接」插件
+- 对接插件支持测试连接与手动同步，计划任务可自动拉取
 - 用户级 REST API v1（API Key）
 - 插件体系：注册商、支付网关、服务器模块、钩子扩展
 - 定时任务：续费、催缴、暂停、终止、邮件队列、域名同步、日志清理
@@ -111,6 +115,7 @@ idceasy/
 │   ├── common.php            全局辅助函数
 │   ├── controller/           前台、后台、API
 │   └── service/              计费、域名、开通、邮件、任务
+├── docs/                     设计与对接文档
 ├── plugins/
 │   ├── Registrar.php  Gateway.php  Server.php  Http.php
 │   ├── registrar/            注册商插件
@@ -162,6 +167,7 @@ idceasy/
 | `registrar` | 域名注册商 | `plugins\Registrar` |
 | `gateway` | 支付网关 | `plugins\Gateway` |
 | `server` | 主机/服务器开通 | `plugins\Server` |
+| `integration` | 财务 / 面板双向对接 | `plugins\Integration` |
 | `addon` | 钩子扩展 | 返回数组 |
 
 完整规范、方法契约、示例代码与钩子列表见 **[PLUGIN_DEVELOPMENT.md](PLUGIN_DEVELOPMENT.md)**。

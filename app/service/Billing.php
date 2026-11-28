@@ -46,22 +46,37 @@ class Billing
             $type = $item['type'] ?? 'product';
             $qty = max(1, min(10, (int)($item['qty'] ?? 1)));
 
-            if ($type === 'domain') {
-                $domain = strtolower(trim((string)($item['domain'] ?? '')));
-                if (!preg_match('/^([a-z0-9]([a-z0-9\-]{0,61}[a-z0-9])?\.)+[a-z]{2,12}$/', $domain)) {
+            if ($type === 'domain' || $type === 'transfer') {
+                $domain = DomainService::normalize((string)($item['domain'] ?? ''));
+                if (!DomainService::valid($domain)) {
                     throw new \RuntimeException('域名格式不正确: ' . $domain);
                 }
-                $tld = substr($domain, strrpos($domain, '.') + 1);
+                $tld = DomainService::tldOf($domain);
                 $tldRow = Db::table('domain_tld')->where('tld', $tld)->where('status', 1)->find();
                 if (!$tldRow) throw new \RuntimeException('暂不支持 .' . $tld . ' 后缀');
                 $years = max(1, min(10, $qty));
-                $unit = (float)$tldRow['register_price'];
+                $options = [];
+                if ($type === 'transfer') {
+                    $authCode = trim((string)($item['auth_code'] ?? ''));
+                    if (strlen($authCode) < 6) throw new \RuntimeException('请填写正确的域名转移密码（EPP Code）');
+                    $unit = (float)($tldRow['transfer_price'] ?: $tldRow['register_price']);
+                    $registrar = (string)($tldRow['registrar'] ?: cfg('domain_default_registrar', 'namesilo'));
+                    $options = ['auth_code' => $authCode];
+                    $name = '.' . $tld . ' 域名转入 ' . $domain;
+                } else {
+                    $quote = DomainService::priceForOrder($domain, $years, (string)($item['registrar'] ?? ''));
+                    if (!$quote['ok']) throw new \RuntimeException($quote['error'] ?? '域名报价失败');
+                    $unit = (float)$quote['price'];
+                    $registrar = (string)$quote['registrar'];
+                    $name = '.' . $tld . ' 域名注册 ' . $domain;
+                }
+                if ($unit <= 0) throw new \RuntimeException('该域名暂未配置价格');
                 $amount = round($unit * $years, 2);
                 $prepared[] = [
-                    'product_id' => (int)($item['product_id'] ?? 0), 'domain' => $domain, 'type' => 'domain',
+                    'product_id' => 0, 'domain' => $domain, 'type' => $type,
                     'qty' => $years, 'cycle' => 'annual', 'unit_price' => $unit, 'setup_fee' => 0,
-                    'options' => [], 'option_names' => '', 'amount' => $amount,
-                    'name' => '.' . $tld . ' 域名注册 ' . $domain, 'tld' => $tld, 'registrar' => $tldRow['registrar'],
+                    'options' => $options, 'option_names' => '', 'amount' => $amount,
+                    'name' => $name, 'tld' => $tld, 'registrar' => $registrar,
                 ];
             } else {
                 $pid = (int)($item['product_id'] ?? 0);
@@ -337,13 +352,22 @@ class Billing
                 }
                 if ((int)$item['domain_id'] > 0) continue;
 
-                if ($item['type'] === 'domain' || ($item['product_id'] && self::productType((int)$item['product_id']) === 'domain')) {
+                if ($item['type'] === 'domain' || $item['type'] === 'transfer' || ($item['product_id'] && self::productType((int)$item['product_id']) === 'domain')) {
                     $domainId = self::createDomainRecord($item, $user, $order);
                     Db::table('order_item')->where('id', $item['id'])->update(['domain_id' => $domainId]);
-                    $res = DomainService::register($domainId);
-                    if (!$res['ok']) {
-                        log_write('domain', '注册失败 ' . $item['domain'] . ': ' . $res['error']);
-                        hook('domain.register_failed', ['domain_id' => $domainId, 'error' => $res['error']]);
+                    if ($item['type'] === 'transfer') {
+                        $opts = json_decode((string)$item['options'], true) ?: [];
+                        $res = DomainService::transfer($domainId, (string)($opts['auth_code'] ?? ''));
+                        if (!$res['ok']) {
+                            log_write('domain', '转入失败 ' . $item['domain'] . ': ' . $res['error']);
+                            hook('domain.register_failed', ['domain_id' => $domainId, 'error' => $res['error']]);
+                        }
+                    } else {
+                        $res = DomainService::register($domainId);
+                        if (!$res['ok']) {
+                            log_write('domain', '注册失败 ' . $item['domain'] . ': ' . $res['error']);
+                            hook('domain.register_failed', ['domain_id' => $domainId, 'error' => $res['error']]);
+                        }
                     }
                 } else {
                     $hostId = self::createHostRecord($item, $user, $order);
@@ -409,16 +433,21 @@ class Billing
             }
             return (int)$exists['id'];
         }
-        $tld = substr($domain, strrpos($domain, '.') + 1);
-        $tldRow = Db::table('domain_tld')->where('tld', $tld)->find();
+        $tld = DomainService::tldOf($domain);
         $years = max(1, (int)$item['qty']);
         $expire = date('Y-m-d H:i:s', strtotime('+' . $years . ' years'));
+        $opts = json_decode((string)($item['options'] ?? ''), true) ?: [];
+        $authCode = (string)($opts['auth_code'] ?? '');
+        $registrar = (string)($item['type'] === 'transfer'
+            ? Db::table('domain_tld')->where('tld', $tld)->value('registrar', '')
+            : '');
+        if ($registrar === '') $registrar = DomainService::chooseRegistrar($domain);
         return Db::table('domain')->insert([
             'user_id' => $order['user_id'], 'order_id' => $order['id'], 'domain' => $domain, 'tld' => $tld,
-            'registrar' => $tldRow['registrar'] ?? cfg('domain_default_registrar', 'namesilo'),
-            'registrar_domain_id' => '', 'status' => 'pending',
+            'registrar' => $registrar,
+            'registrar_domain_id' => '', 'status' => $item['type'] === 'transfer' ? 'transferring' : 'pending',
             'reg_date' => now(), 'expire_date' => $expire, 'next_due' => $expire,
-            'auto_renew' => 1, 'lock' => 1, 'privacy' => 0, 'auth_code' => '',
+            'auto_renew' => 1, 'lock' => 1, 'privacy' => 0, 'auth_code' => $authCode,
             'ns' => json_encode([], JSON_UNESCAPED_UNICODE), 'dns' => json_encode([], JSON_UNESCAPED_UNICODE),
             'cycle' => 'annual', 'price' => $item['unit_price'], 'currency' => $order['currency'],
             'created_at' => now(), 'updated_at' => now(),

@@ -141,6 +141,7 @@ class Cart extends Front
                 $payload[] = [
                     'type' => $item['type'], 'product_id' => $item['product_id'], 'domain' => $item['domain'],
                     'cycle' => $item['cycle'], 'qty' => $item['qty'], 'options' => $item['options'],
+                    'registrar' => $item['registrar'] ?? '', 'auth_code' => $item['auth_code'] ?? '',
                 ];
             }
             try {
@@ -166,7 +167,7 @@ class Cart extends Front
         foreach (cart() as $key => $item) {
             $row = $item;
             $row['key'] = $key;
-            if (($item['type'] ?? '') === 'domain') {
+            if (in_array(($item['type'] ?? ''), ['domain', 'transfer'], true)) {
                 $row['price'] = (float)$item['price'];
                 $row['amount'] = $row['price'] * (int)$item['qty'];
                 $row['setup_fee'] = 0;

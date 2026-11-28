@@ -48,7 +48,13 @@ Router::get('/kb/article/{id}', [Home::class, 'kbArticle']);
 Router::get('/downloads', [Home::class, 'downloads']);
 Router::any('/contact', [Home::class, 'contact']);
 
-Router::any('/domain', [Domain::class, 'index']);
+// 域名注册商门户
+Router::get('/domains', [Domain::class, 'portal']);
+Router::any('/domains/search', [Domain::class, 'search']);
+Router::post('/domains/register', [Domain::class, 'register']);
+Router::any('/domains/transfer', [Domain::class, 'transfer']);
+// 旧地址兼容
+Router::any('/domain', [Domain::class, 'legacy']);
 Router::any('/domain/search', [Domain::class, 'search']);
 Router::post('/domain/add', [Domain::class, 'add']);
 
@@ -179,6 +185,7 @@ Router::group('/admin', function () {
     Router::any('/plugin/{type}/{name}', [PluginController::class, 'config']);
     Router::post('/plugin/{type}/{name}/toggle', [PluginController::class, 'toggle']);
     Router::post('/plugin/{type}/{name}/test', [PluginController::class, 'test']);
+    Router::post('/plugin/{type}/{name}/sync', [PluginController::class, 'sync']);
 
     Router::get('/templates', [Template::class, 'index']);
     Router::get('/template/edit', [Template::class, 'edit']);

@@ -102,7 +102,18 @@ $ice->payInvoice($order['data']['invoice_id'], 120.00, 'CUBE-20260101-001');
 - 定时拉取 `invoice.list` 对账，差异以 idceasy 为准
 - 不要在两边同时对同一服务执行暂停/删除
 
-## 六、反向同步
+## 六、出站对接（idceasy 主动调用对方）
+
+后台「插件 - 对接（财务 / 面板）」启用 `魔方财务对接（Bridge v1）`，填写对方地址与 Bridge Key。
+
+- 「测试连接」调用 `ping`
+- 「从远端拉取客户」调用 `client.list`，缺失邮箱自动建立账户
+- 开启「新用户自动推送」后，注册事件会调用 `client.create`
+- 开启「计划任务自动拉取」后，`cron.run` 会定期同步
+
+出站使用与入站相同的 Bridge v1 协议，对方只需实现 `ping`、`client.list`、`client.create` 三个动作即可完成客户双向同步。
+
+## 七、反向同步
 
 如果需要 idceasy 主动推送事件到魔方财务，可开发一个 addon 插件监听：
 
