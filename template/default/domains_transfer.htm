@@ -1,0 +1,83 @@
+{include header}
+<style>
+  .tr-hero{background:#0a1a30;color:#fff;padding:52px 0 58px;position:relative;overflow:hidden}
+  .tr-hero:before{content:"";position:absolute;inset:0;background:radial-gradient(620px 360px at 15% 0%,rgba(37,99,235,.35),transparent 65%)}
+  .tr-hero .container{position:relative;z-index:1}
+  .tr-hero h1{color:#fff;font-size:40px;margin:14px 0 10px;letter-spacing:-.02em}
+  .tr-hero p{color:#a7b7cb;max-width:600px;margin:0}
+  .tr-wrap{display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:start;padding:44px 0 60px}
+  .tr-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:28px;box-shadow:var(--shadow)}
+  .tr-card h2{font-size:20px;margin-bottom:4px}
+  .tr-card .hint{font-size:13px;color:var(--muted);margin-bottom:20px}
+  .tr-field{margin-bottom:16px}
+  .tr-field label{display:block;font-size:13px;font-weight:600;color:var(--ink);margin-bottom:6px}
+  .tr-field input,.tr-field select{width:100%;height:44px;border:1px solid var(--line);border-radius:10px;padding:0 12px;font-size:14px;background:#fff;color:var(--text)}
+  .tr-field input:focus,.tr-field select:focus{outline:0;border-color:#93b4f8;box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+  .tr-help{font-size:12px;color:#98a2b3;margin-top:6px;line-height:1.7}
+  .tr-price{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px dashed var(--line);font-size:14px}
+  .tr-price:last-child{border-bottom:0}
+  .tr-price b{color:var(--ink)}
+  .tr-steps{display:grid;gap:14px;margin-top:18px}
+  .tr-step{display:flex;gap:12px;font-size:13px;color:var(--muted);line-height:1.8}
+  .tr-step i{font-style:normal;flex:none;width:22px;height:22px;border-radius:50%;background:#eef4ff;color:#1d4ed8;font-size:11px;display:grid;place-items:center;font-weight:700}
+  @media(max-width:900px){.tr-wrap{grid-template-columns:1fr}.tr-hero h1{font-size:32px}}
+</style>
+
+<section class="tr-hero">
+  <div class="container">
+    <span class="dp-eyebrow" style="display:inline-flex;align-items:center;gap:8px;font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;color:#8fc0ff;border:1px solid rgba(143,192,255,.28);border-radius:999px;padding:6px 12px;background:rgba(37,99,235,.12)">Transfer · 域名转入</span>
+    <h1>把它带过来，<br>只差一个 EPP 码。</h1>
+    <p>转入会在原到期日基础上延长一年，解析与网站不受影响。支付后自动向上游提交，通常 5–7 天完成。</p>
+  </div>
+</section>
+
+<div class="container">
+  <div class="tr-wrap">
+    <div class="tr-card">
+      <h2>发起转入</h2>
+      <p class="hint">请先在原注册商处解锁域名，并获取转移密码（Auth / EPP Code）。</p>
+      <form method="post" action="{url('/domains/transfer')}">
+        {csrf}
+        <div class="tr-field">
+          <label>域名</label>
+          <input type="text" name="domain" placeholder="example.com" required autocomplete="off">
+        </div>
+        <div class="tr-field">
+          <label>转移密码（EPP Code）</label>
+          <input type="text" name="auth_code" placeholder="由原注册商提供" required autocomplete="off">
+          <div class="tr-help">密码通常是一串 8–32 位的字母数字组合，区分大小写。</div>
+        </div>
+        <div class="tr-field">
+          <label>转入年限</label>
+          <select name="years">
+            <option value="1">1 年（含一年续费）</option>
+            <option value="2">2 年</option>
+            <option value="3">3 年</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" type="submit" style="width:100%;height:46px">加入购物车并继续</button>
+      </form>
+      <div class="tr-help" style="margin-top:14px">转入前请确认域名已注册满 60 天，且不在赎回期或争议状态。</div>
+    </div>
+
+    <div>
+      <div class="tr-card" style="margin-bottom:18px">
+        <h2 style="font-size:16px">转入价格</h2>
+        <p class="hint" style="margin-bottom:10px">含一年续费，价格按下单时为准。</p>
+        {loop $tlds as $t}
+        <div class="tr-price"><span>.{$t.tld}</span><b>{money($t.transfer_price, $t.currency)}</b></div>
+        {/loop}
+      </div>
+      <div class="tr-card">
+        <h2 style="font-size:16px">转入流程</h2>
+        <div class="tr-steps">
+          <div class="tr-step"><i>1</i><span>在原注册商处关闭转移锁，获取 EPP 码。</span></div>
+          <div class="tr-step"><i>2</i><span>在本站提交域名与 EPP 码，支付一年续费。</span></div>
+          <div class="tr-step"><i>3</i><span>系统向原注册商发起转移，收到确认邮件后同意。</span></div>
+          <div class="tr-step"><i>4</i><span>转移完成，到期日自动延长一年，可正常修改 NS。</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{include footer}

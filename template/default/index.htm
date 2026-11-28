@@ -7,7 +7,7 @@
       <p class="lead">idceasy 是一套可自托管的 IDC 计费与云服务系统。原生对接 20+ 域名注册商、主流支付网关与服务器面板，开源、可扩展、数据完全归你所有。</p>
       <div class="hero-actions">
         <a class="btn btn-primary btn-lg" href="{url('/products')}">浏览产品</a>
-        <a class="btn btn-ghost btn-lg" href="{url('/domain')}">查询域名</a>
+        <a class="btn btn-ghost btn-lg" href="{url('/domains')}">查询域名</a>
       </div>
       <div class="hero-points">
         <span>一键安装</span>
@@ -97,7 +97,7 @@
           <h2 style="color:#fff;margin-bottom:8px">找到属于你的域名</h2>
           <p style="color:#bfdbfe;margin-bottom:0">支持 .com / .cn / .net / .io 等 20+ 后缀，实时查询注册商库存。</p>
         </div>
-        <form class="search-bar" method="get" action="{url('/domain')}">
+        <form class="search-bar" method="get" action="{url('/domains/search')}">
           <input type="text" name="keyword" placeholder="输入域名，例如 idceasy" autocomplete="off">
           <button class="btn btn-primary" type="submit">立即查询</button>
         </form>
