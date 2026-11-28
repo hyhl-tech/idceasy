@@ -1,0 +1,34 @@
+{include header}
+<section class="section">
+  <div class="container">
+    <div class="grid" style="grid-template-columns:1fr 1.1fr;gap:32px;align-items:start">
+      <div>
+        <span class="eyebrow">Contact</span>
+        <h2>联系我们</h2>
+        <p class="muted">售前咨询、批量采购、代理合作或故障求助，都可以通过下面的方式联系。已有账户建议直接提交工单，便于跟踪处理进度。</p>
+        <div class="card mt-2">
+          <div class="kv">
+            <span class="k">技术支持</span><span class="v">{cfg('company_email')}</span>
+            <span class="k">联系电话</span><span class="v">{cfg('company_phone')}</span>
+            <span class="k">公司地址</span><span class="v">{cfg('company_address')}</span>
+            <span class="k">工作时间</span><span class="v">周一至周日 09:00 - 22:00</span>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:14px">发送消息</h3>
+        <form method="post" action="{url('/contact')}">
+          {csrf}
+          <div class="form-grid">
+            <div class="form-row"><label>姓名</label><input type="text" name="name" required></div>
+            <div class="form-row"><label>邮箱</label><input type="email" name="email" required></div>
+          </div>
+          <div class="form-row"><label>主题</label><input type="text" name="subject"></div>
+          <div class="form-row"><label>内容</label><textarea name="message" rows="6" required></textarea></div>
+          <button class="btn btn-primary" type="submit">发送</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+{include footer}

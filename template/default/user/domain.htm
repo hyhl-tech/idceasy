@@ -1,0 +1,92 @@
+{include header}
+<div class="container">
+  <div class="uc-layout">
+    {include user/sidebar}
+    <main class="uc-main">
+      <div class="small muted" style="margin-bottom:8px"><a href="{url('/user/domains')}">我的域名</a> / {$domain.domain}</div>
+      <div class="page-head">
+        <div>
+          <h1>{$domain.domain}</h1>
+          <p class="small muted" style="margin:2px 0 0">注册商 {$domain.registrar} · 到期 {$domain.expire_date}</p>
+        </div>
+        <span class="badge {status_class($domain.status)}">{status_text($domain.status)}</span>
+      </div>
+
+      {if $epp}
+      <div class="alert ok">转移密码（EPP Code）：<code>{$epp}</code>。请妥善保管，转出后此密码可能失效。</div>
+      {/if}
+
+      <div class="grid" style="grid-template-columns:1.3fr 1fr;gap:18px;align-items:start">
+        <div>
+          <div class="panel">
+            <div class="panel-title"><h3>域名信息</h3></div>
+            <div class="kv">
+              <span class="k">域名</span><span class="v">{$domain.domain}</span>
+              <span class="k">状态</span><span class="v">{status_text($domain.status)}</span>
+              <span class="k">注册时间</span><span class="v">{$domain.reg_date}</span>
+              <span class="k">到期时间</span><span class="v">{$domain.expire_date}</span>
+              <span class="k">转移锁</span><span class="v">{if $domain.lock}已开启{else}已关闭{/if}</span>
+              <span class="k">隐私保护</span><span class="v">{if $domain.privacy}已开启{else}未开启{/if}</span>
+              <span class="k">自动续费</span><span class="v">{if $domain.auto_renew}开启{else}关闭{/if}</span>
+            </div>
+            <div class="flex mt-3" style="flex-wrap:wrap">
+              <form method="post" action="{url('/user/domain/' . $domain.id . '/sync')}">
+                {csrf}<button class="btn btn-ghost btn-sm" type="submit">同步状态</button>
+              </form>
+              <form method="post" action="{url('/user/domain/' . $domain.id . '/epp')}">
+                {csrf}<button class="btn btn-ghost btn-sm" type="submit">获取转移密码</button>
+              </form>
+              <form method="post" action="{url('/user/domain/' . $domain.id . '/lock')}">
+                {csrf}<input type="hidden" name="enable" value="{if $domain.lock}0{else}1{/if}">
+                <button class="btn btn-ghost btn-sm" type="submit">{if $domain.lock}关闭转移锁{else}开启转移锁{/if}</button>
+              </form>
+              <form method="post" action="{url('/user/domain/' . $domain.id . '/privacy')}">
+                {csrf}<input type="hidden" name="enable" value="{if $domain.privacy}0{else}1{/if}">
+                <button class="btn btn-ghost btn-sm" type="submit">{if $domain.privacy}关闭隐私保护{else}开启隐私保护{/if}</button>
+              </form>
+            </div>
+          </div>
+
+          <div class="panel mt-2">
+            <div class="panel-title"><h3>DNS 服务器</h3></div>
+            <form method="post" action="{url('/user/domain/' . $domain.id . '/ns')}">
+              {csrf}
+              {loop $ns as $n}
+              <div class="form-row"><input type="text" name="ns[]" value="{$n}" placeholder="ns1.example.com"></div>
+              {/loop}
+              {if count($ns) < 2}
+              <div class="form-row"><input type="text" name="ns[]" placeholder="ns1.example.com"></div>
+              <div class="form-row"><input type="text" name="ns[]" placeholder="ns2.example.com"></div>
+              {/if}
+              <button class="btn btn-primary btn-sm" type="submit">保存 NS</button>
+              <div class="form-help">修改 NS 后全球生效通常需要 24-48 小时。请至少填写两组。</div>
+            </form>
+          </div>
+        </div>
+
+        <div>
+          <div class="panel">
+            <div class="panel-title"><h3>续费</h3></div>
+            <div class="small muted">续费价格 {money($tld.renew_price)} / 年</div>
+            <form method="post" action="{url('/user/domain/' . $domain.id . '/renew')}" class="mt-2">
+              {csrf}
+              <div class="form-row">
+                <label>续费年限</label>
+                <select name="years">
+                  <option value="1">1 年</option><option value="2">2 年</option>
+                  <option value="3">3 年</option><option value="5">5 年</option>
+                </select>
+              </div>
+              <button class="btn btn-primary btn-block" type="submit">生成续费账单</button>
+            </form>
+          </div>
+          <div class="panel mt-2">
+            <div class="panel-title"><h3>解析提示</h3></div>
+            <p class="small muted" style="margin:0">若使用 idceasy 默认 DNS，请在域名解析服务中添加 A / CNAME / MX 记录；若使用第三方 DNS，请在上方修改 NS 为服务商提供的地址。</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+{include footer}

@@ -1,0 +1,20 @@
+{include header}
+<section class="section">
+  <div class="container">
+    <div class="section-head"><div><span class="eyebrow">Help Center</span><h2>帮助中心</h2><p>常见问题、配置教程与故障排查。</p></div></div>
+    <div class="grid grid-2">
+      {loop $categories as $c}
+      <div class="card">
+        <h3>{$c.name}</h3>
+        <ul class="feature-list" style="margin-top:10px">
+          {loop $c.articles as $a}
+          <li><a href="{url('/kb/article/' . $a.id)}">{$a.title}</a></li>
+          {/loop}
+        </ul>
+        <a class="small" href="{url('/kb/' . $c.id)}">查看全部 →</a>
+      </div>
+      {/loop}
+    </div>
+  </div>
+</section>
+{include footer}

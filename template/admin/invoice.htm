@@ -1,0 +1,93 @@
+{include header}
+<div class="adm-head">
+  <div>
+    <h1>账单 {$invoice.invoice_no} <span class="badge {status_class($invoice.status)}" style="vertical-align:middle">{status_text($invoice.status)}</span></h1>
+    <p>客户 <a href="{admin_url('/client/' . $user.id)}">{$user.email}</a> · 到期 {$invoice.due_at} · 创建 {$invoice.created_at}</p>
+  </div>
+  <div class="flex">
+    <a class="btn" href="{admin_url('/invoices')}">返回列表</a>
+    <a class="btn" href="{admin_url('/invoice/' . $invoice.id . '/print')}" target="_blank">打印</a>
+    <form method="post" action="{admin_url('/invoice/' . $invoice.id . '/send')}">
+      {csrf}<button class="btn" type="submit">发送提醒</button>
+    </form>
+  </div>
+</div>
+
+<div class="grid-2" style="grid-template-columns:1.6fr 1fr">
+  <div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>项目</th><th class="num">数量</th><th class="num">金额</th></tr></thead>
+          <tbody>
+            {loop $items as $item}
+            <tr><td>{$item.description}</td><td class="num">{$item.qty}</td><td class="num">{money($item.amount * $item.qty)}</td></tr>
+            {/loop}
+          </tbody>
+        </table>
+      </div>
+      <div style="padding:16px;max-width:340px;margin-left:auto">
+        <div class="summary-row"><span class="muted">小计</span><span>{money($invoice.subtotal)}</span></div>
+        {if $invoice.discount > 0}<div class="summary-row"><span class="muted">优惠</span><span>-{money($invoice.discount)}</span></div>{/if}
+        {if $invoice.tax > 0}<div class="summary-row"><span class="muted">税费</span><span>{money($invoice.tax)}</span></div>{/if}
+        <div class="summary-row total"><span>合计</span><span>{money($invoice.total)}</span></div>
+        <div class="summary-row"><span class="muted">已付</span><span>{money($invoice.paid)}</span></div>
+      </div>
+    </div>
+
+    <div class="card mt-2">
+      <div class="card-title"><h3>收款记录</h3></div>
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>时间</th><th>网关</th><th>交易号</th><th>备注</th><th class="num">金额</th></tr></thead>
+          <tbody>
+            {loop $transactions as $t}
+            <tr><td class="small">{$t.created_at}</td><td>{$t.gateway}</td><td class="small muted">{$t.trade_no}</td>
+            <td class="small muted">{$t.remark}</td><td class="num">{money($t.amount)}</td></tr>
+            {/loop}
+            {if !$transactions}<tr><td colspan="5" class="empty">暂无收款记录</td></tr>{/if}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <div class="card-title"><h3>手动入账</h3></div>
+      <form method="post" action="{admin_url('/invoice/' . $invoice.id . '/paid')}">
+        {csrf}
+        <div class="form-row"><label>金额</label><input type="number" step="0.01" name="amount" value="{if $invoice.status == 'unpaid'}{:number_format($invoice.total - $invoice.paid, 2, '.', '')}{/if}" required></div>
+        <div class="form-row"><label>网关</label><input type="text" name="gateway" value="manual"></div>
+        <div class="form-row"><label>交易号</label><input type="text" name="trade_no" placeholder="可选，用于防重复"></div>
+        <button class="btn btn-primary btn-sm" type="submit">确认入账</button>
+      </form>
+    </div>
+
+    <div class="card mt-2">
+      <div class="card-title"><h3>退款</h3></div>
+      <form method="post" action="{admin_url('/invoice/' . $invoice.id . '/refund')}" data-confirm="退款将记入客户余额，确定继续？">
+        {csrf}
+        <div class="form-row"><label>金额</label><input type="number" step="0.01" name="amount" value="{$invoice.paid}" required></div>
+        <div class="form-row"><label>原因</label><input type="text" name="reason" value="管理员退款"></div>
+        <button class="btn btn-danger btn-sm" type="submit">退款到余额</button>
+      </form>
+      {if $invoice.status == 'unpaid'}
+      <form method="post" action="{admin_url('/invoice/' . $invoice.id . '/cancel')}" class="mt-2" data-confirm="确定取消该账单？">
+        {csrf}<button class="btn btn-sm" type="submit">取消账单</button>
+      </form>
+      {/if}
+    </div>
+
+    <div class="card mt-2">
+      <div class="card-title"><h3>关联信息</h3></div>
+      <div class="kv small" style="display:grid;grid-template-columns:90px 1fr;gap:8px 10px">
+        <span class="muted">订单</span><span>{if $order}<a href="{admin_url('/order/' . $order.id)}">{$order.order_no}</a>{else}-{/if}</span>
+        <span class="muted">货币</span><span>{$invoice.currency}</span>
+        <span class="muted">支付时间</span><span>{if $invoice.paid_at}{$invoice.paid_at}{else}-{/if}</span>
+        <span class="muted">备注</span><span>{$invoice.note}</span>
+      </div>
+    </div>
+  </div>
+</div>
+{include footer}

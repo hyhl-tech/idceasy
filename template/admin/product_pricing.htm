@@ -1,0 +1,28 @@
+{include header}
+<div class="adm-head">
+  <div><h1>计费周期：{$product.name}</h1><p>为每个周期设置价格与设置费，未启用的周期不会展示给客户。</p></div>
+  <div class="flex"><a class="btn" href="{admin_url('/product/' . $product.id . '/options')}">可配置选项</a><a class="btn" href="{admin_url('/products')}">返回产品</a></div>
+</div>
+<div class="card" style="max-width:980px">
+  <form method="post" action="{admin_url('/product/' . $product.id . '/pricing')}">
+    {csrf}
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>周期</th><th>启用</th><th>价格</th><th>设置费</th><th>货币</th></tr></thead>
+        <tbody>
+          {loop cycles() as $c}
+          <tr>
+            <td>{cycle_text($c)}<div class="small muted">{$c}</div></td>
+            <td><input type="checkbox" name="cycle[{$c}][enabled]" value="1" {if arr_get($map[$c], 'enabled')}checked{/if}></td>
+            <td><input type="number" step="0.01" name="cycle[{$c}][price]" value="{arr_get($map[$c], 'price')}" style="max-width:130px"></td>
+            <td><input type="number" step="0.01" name="cycle[{$c}][setup_fee]" value="{arr_get($map[$c], 'setup_fee')}" style="max-width:130px"></td>
+            <td><input type="text" name="cycle[{$c}][currency]" value="{if arr_get($map[$c], 'currency')}{arr_get($map[$c], 'currency')}{else}CNY{/if}" style="max-width:90px"></td>
+          </tr>
+          {/loop}
+        </tbody>
+      </table>
+    </div>
+    <div class="form-actions"><button class="btn btn-primary" type="submit">保存价格</button></div>
+  </form>
+</div>
+{include footer}

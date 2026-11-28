@@ -1,0 +1,30 @@
+{include header}
+<div class="adm-head"><div><h1>添加服务</h1><p>手动创建主机记录，可选择立即调用模块开通。</p></div><a class="btn" href="{admin_url('/hosts')}">返回列表</a></div>
+<div class="card" style="max-width:900px">
+  <form method="post" action="{admin_url('/host/create')}">
+    {csrf}
+    <div class="form-grid">
+      <div class="form-row"><label>客户 ID <span style="color:var(--danger)">*</span></label><input type="number" name="user_id" required></div>
+      <div class="form-row"><label>产品 <span style="color:var(--danger)">*</span></label>
+        <select name="product_id" required>
+          <option value="">请选择</option>
+          {loop $products as $p}
+          <option value="{$p.id}">{$p.name}（{$p.module}）</option>
+          {/loop}
+        </select>
+      </div>
+      <div class="form-row"><label>域名 / 服务标识 <span style="color:var(--danger)">*</span></label><input type="text" name="domain" placeholder="example.com" required></div>
+      <div class="form-row"><label>用户名</label><input type="text" name="username" placeholder="留空自动生成"></div>
+      <div class="form-row"><label>密码</label><input type="text" name="password" placeholder="留空自动生成"></div>
+      <div class="form-row"><label>计费周期</label>
+        <select name="cycle">
+          {loop cycles() as $c}<option value="{$c}">{cycle_text($c)}</option>{/loop}
+        </select>
+      </div>
+      <div class="form-row full"><label>备注</label><textarea name="notes" rows="2"></textarea></div>
+    </div>
+    <label class="check"><input type="checkbox" name="provision" value="1"> 创建后立即调用开通模块</label>
+    <div class="form-actions"><button class="btn btn-primary" type="submit">创建服务</button><a class="btn" href="{admin_url('/hosts')}">取消</a></div>
+  </form>
+</div>
+{include footer}

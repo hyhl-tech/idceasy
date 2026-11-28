@@ -1,0 +1,45 @@
+{include header}
+<div class="adm-head">
+  <div><h1>插件</h1><p>目录 /plugins 下的插件会被自动发现；启用并配置后即可使用。</p></div>
+  <span class="small muted">开发规范见根目录 PLUGIN_DEVELOPMENT.md</span>
+</div>
+
+{loop $types as $type => $label}
+<div class="card" style="margin-bottom:18px">
+  <div class="card-title"><h3>{$label}</h3><span class="small muted">{count($data[$type])} 个</span></div>
+  <div class="grid-3">
+    {loop $data[$type] as $p}
+    <div class="plugin-card">
+      <div class="between">
+        <h4>{$p.title}</h4>
+        <span class="badge {if $p.enabled}ok{else}muted{/if}">{if $p.enabled}已启用{else}未启用{/if}</span>
+      </div>
+      <div class="plugin-meta">
+        <span>v{$p.version}</span>
+        {if $p.author}<span>{$p.author}</span>{/if}
+        <span class="mono">{$p.id}</span>
+      </div>
+      <div class="plugin-desc">{if $p.description}{$p.description}{else}暂无描述{/if}</div>
+      {if $p.error}<div class="alert error" style="margin:0;font-size:12px">{$p.error}</div>{/if}
+      <div class="plugin-actions">
+        <a class="btn btn-sm" href="{admin_url('/plugin/' . $type . '/' . $p.id)}">配置</a>
+        {if $p.installed}
+        <form method="post" action="{admin_url('/plugin/' . $type . '/' . $p.id . '/toggle')}">
+          {csrf}<button class="btn btn-sm" type="submit">{if $p.enabled}停用{else}启用{/if}</button>
+        </form>
+        <form method="post" action="{admin_url('/plugin/' . $type . '/' . $p.id . '/test')}">
+          {csrf}<button class="btn btn-sm" type="submit">测试</button>
+        </form>
+        {else}
+        <form method="post" action="{admin_url('/plugin/' . $type . '/' . $p.id . '/toggle')}">
+          {csrf}<button class="btn btn-sm btn-primary" type="submit">安装启用</button>
+        </form>
+        {/if}
+      </div>
+    </div>
+    {/loop}
+    {if !$data[$type]}<p class="small muted" style="margin:0">暂无插件。</p>{/if}
+  </div>
+</div>
+{/loop}
+{include footer}

@@ -1,0 +1,69 @@
+{include header}
+<div class="adm-head">
+  <div>
+    <h1>订单 {$order.order_no} <span class="badge {status_class($order.status)}" style="vertical-align:middle">{status_text($order.status)}</span></h1>
+    <p>{$order.created_at} · 客户 <a href="{admin_url('/client/' . $user.id)}">{$user.email}</a></p>
+  </div>
+  <div class="flex">
+    <a class="btn" href="{admin_url('/orders')}">返回列表</a>
+    <form method="post" action="{admin_url('/order/' . $order.id . '/activate')}" data-confirm="将重新执行开通流程，确定继续？">
+      {csrf}<button class="btn btn-primary" type="submit">执行开通</button>
+    </form>
+  </div>
+</div>
+<div class="grid-2" style="grid-template-columns:1.6fr 1fr">
+  <div class="card" style="padding:0;overflow:hidden">
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>项目</th><th>类型</th><th>周期</th><th class="num">单价</th><th class="num">金额</th><th>服务</th></tr></thead>
+        <tbody>
+          {loop $items as $item}
+          <tr>
+            <td>{$item.domain}{if !$item.domain}{$item.product.name}{/if}<div class="small muted">{$item.product.name}</div></td>
+            <td class="small">{$item.type}</td>
+            <td class="small">{cycle_text($item.cycle)}</td>
+            <td class="num">{money($item.unit_price)}</td>
+            <td class="num">{money($item.amount)}</td>
+            <td class="small">
+              {if $item.host_id}<a href="{admin_url('/host/' . $item.host_id)}">服务 #{$item.host_id}</a>{/if}
+              {if $item.domain_id}<a href="{admin_url('/domain/' . $item.domain_id)}">域名 #{$item.domain_id}</a>{/if}
+              {if !$item.host_id && !$item.domain_id}<span class="muted">未创建</span>{/if}
+            </td>
+          </tr>
+          {/loop}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <div class="card-title"><h3>金额</h3></div>
+      <div class="summary-row"><span class="muted">订单总额</span><span>{money($order.total)}</span></div>
+      <div class="summary-row"><span class="muted">优惠</span><span>{money($order.discount)}</span></div>
+      <div class="summary-row"><span class="muted">税费</span><span>{money($order.tax)}</span></div>
+      <div class="summary-row"><span class="muted">已付</span><span>{money($order.paid_amount)}</span></div>
+      {if $invoice}
+      <div class="summary-row total"><span>账单</span><span><a href="{admin_url('/invoice/' . $invoice.id)}">{$invoice.invoice_no}</a></span></div>
+      {/if}
+    </div>
+    <div class="card mt-2">
+      <div class="card-title"><h3>修改状态</h3></div>
+      <form method="post" action="{admin_url('/order/' . $order.id . '/status')}">
+        {csrf}
+        <select name="status">
+          <option value="pending" {if $order.status == 'pending'}selected{/if}>待支付</option>
+          <option value="paid" {if $order.status == 'paid'}selected{/if}>已支付</option>
+          <option value="active" {if $order.status == 'active'}selected{/if}>已开通</option>
+          <option value="fraud" {if $order.status == 'fraud'}selected{/if}>风险</option>
+          <option value="cancelled" {if $order.status == 'cancelled'}selected{/if}>取消</option>
+          <option value="refunded" {if $order.status == 'refunded'}selected{/if}>退款</option>
+        </select>
+        <button class="btn btn-sm btn-primary mt-2" type="submit">更新状态</button>
+      </form>
+    </div>
+    {if $order.note}
+    <div class="card mt-2"><div class="card-title"><h3>客户备注</h3></div><p class="small muted" style="margin:0">{$order.note}</p></div>
+    {/if}
+  </div>
+</div>
+{include footer}

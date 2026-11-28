@@ -1,0 +1,44 @@
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">{$siteName}</div>
+        <p style="max-width:300px;font-size:13.5px;color:#94a3b8">{cfg('site_slogan','简单、快速、可扩展的 IDC 计费与云服务系统')}</p>
+        <p style="font-size:12.5px;color:#64748b;margin-top:12px">开源 · AGPL-3.0 · 数据自主可控</p>
+      </div>
+      <div class="footer-col">
+        <h4>产品</h4>
+        {loop $menu as $m}
+        {if $m.title != '帮助中心' && $m.title != '公告'}
+        <a href="{$m.url}">{$m.title}</a>
+        {/if}
+        {/loop}
+      </div>
+      <div class="footer-col">
+        <h4>支持</h4>
+        <a href="{url('/kb')}">帮助中心</a>
+        <a href="{url('/announcements')}">服务公告</a>
+        <a href="{url('/contact')}">联系我们</a>
+        <a href="{url('/user/ticket/new')}">提交工单</a>
+      </div>
+      <div class="footer-col">
+        <h4>公司</h4>
+        <a href="{url('/page/about')}">关于我们</a>
+        <a href="{url('/page/terms')}">服务条款</a>
+        <a href="{url('/page/privacy')}">隐私政策</a>
+        <a href="{url('/page/sla')}">服务等级</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© {$year} {cfg('company_name',$siteName)}. All rights reserved.</span>
+      <span>
+        {if cfg('icp')}<a href="https://beian.miit.gov.cn" target="_blank" rel="nofollow">{cfg('icp')}</a>{/if}
+        <span style="color:#475569"> · <a href="https://idceasy.site" target="_blank" rel="noopener">官网 idceasy.site</a> · Powered by idceasy</span>
+      </span>
+    </div>
+    {if cfg('footer_html')}<div style="margin-top:14px;font-size:12.5px;color:#64748b">{:cfg('footer_html')}</div>{/if}
+  </div>
+</footer>
+<script src="{asset('js/app.js')}"></script>
+</body>
+</html>

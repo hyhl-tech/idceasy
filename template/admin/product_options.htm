@@ -1,0 +1,32 @@
+{include header}
+<div class="adm-head">
+  <div><h1>可配置选项：{$product.name}</h1><p>每行一个选项值，格式：名称|价格|设置费。留空的选项不会保存。</p></div>
+  <div class="flex"><a class="btn" href="{admin_url('/product/' . $product.id . '/pricing')}">计费周期</a><a class="btn" href="{admin_url('/products')}">返回产品</a></div>
+</div>
+<form method="post" action="{admin_url('/product/' . $product.id . '/options')}">
+  {csrf}
+  {loop $options as $i => $opt}
+  <div class="card" style="margin-bottom:16px">
+    <div class="grid-3">
+      <div class="form-row"><label>选项名称</label><input type="text" name="options[{$i}][name]" value="{$opt.name}" placeholder="例如：机房线路"></div>
+      <div class="form-row"><label>类型</label>
+        <select name="options[{$i}][type]">
+          <option value="select" {if $opt.type == 'select'}selected{/if}>下拉单选</option>
+          <option value="checkbox" {if $opt.type == 'checkbox'}selected{/if}>复选框（可多选）</option>
+          <option value="qty" {if $opt.type == 'qty'}selected{/if}>数量</option>
+        </select>
+      </div>
+      <div class="form-row"><label>必选</label>
+        <label class="check" style="margin-top:8px"><input type="checkbox" name="options[{$i}][required]" value="1" {if $opt.required}checked{/if}> 客户必须选择</label>
+      </div>
+    </div>
+    <div class="form-row">
+      <label>选项值（每行：名称|价格|设置费）</label>
+      <textarea class="code-input" name="options[{$i}][values]" rows="5" placeholder="华东电信|0|0&#10;香港 BGP|20|0">{loop $opt.values as $v}{$v.name}|{$v.price}|{$v.setup_fee}
+{/loop}</textarea>
+    </div>
+  </div>
+  {/loop}
+  <div class="flex"><button class="btn btn-primary" type="submit">保存选项</button><span class="small muted">保存后会自动追加两个空白选项，方便继续添加。</span></div>
+</form>
+{include footer}

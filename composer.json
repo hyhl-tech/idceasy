@@ -1,0 +1,28 @@
+{
+    "name": "idceasy/idceasy",
+    "description": "idceasy - 开源 IDC 计费与云服务管理系统（ThinkPHP 兼容内核，零依赖）",
+    "type": "project",
+    "license": "AGPL-3.0-only",
+    "homepage": "https://idceasy.site",
+    "require": {
+        "php": ">=8.1",
+        "ext-pdo": "*",
+        "ext-pdo_mysql": "*",
+        "ext-curl": "*",
+        "ext-mbstring": "*",
+        "ext-openssl": "*",
+        "ext-json": "*",
+        "ext-simplexml": "*",
+        "ext-dom": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "think\\": "core/",
+            "app\\": "app/",
+            "plugins\\": "plugins/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true
+    }
+}

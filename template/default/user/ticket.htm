@@ -1,0 +1,52 @@
+{include header}
+<div class="container">
+  <div class="uc-layout">
+    {include user/sidebar}
+    <main class="uc-main">
+      <div class="small muted" style="margin-bottom:8px"><a href="{url('/user/tickets')}">工单支持</a> / #{$ticket.id}</div>
+      <div class="page-head">
+        <div>
+          <h1 style="font-size:20px">{$ticket.subject}</h1>
+          <p class="small muted" style="margin:2px 0 0">{if $dept}{$dept.name}{/if} · 创建于 {$ticket.created_at}</p>
+        </div>
+        <div class="flex">
+          <span class="badge {status_class($ticket.status)}">{status_text($ticket.status)}</span>
+          {if $ticket.status != 'closed'}
+          <form method="post" action="{url('/user/ticket/' . $ticket.id . '/close')}" data-confirm="确定关闭该工单？">
+            {csrf}<button class="btn btn-sm btn-ghost" type="submit">关闭</button>
+          </form>
+          {/if}
+        </div>
+      </div>
+
+      <div class="panel">
+        {loop $replies as $r}
+        <div style="display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)">
+          <div class="avatar">{if $r.admin_id}A{else}{first_char($user.name)}{/if}</div>
+          <div style="flex:1;min-width:0">
+            <div class="flex-between">
+              <strong style="font-size:13.5px;color:var(--ink)">{if $r.admin_id}客服团队{else}{$user.name}{/if}</strong>
+              <span class="small muted">{$r.created_at}</span>
+            </div>
+            <div style="margin-top:6px;font-size:14px;line-height:1.8">{:nl2br(e($r.message))}</div>
+          </div>
+        </div>
+        {/loop}
+      </div>
+
+      {if $ticket.status != 'closed'}
+      <div class="panel mt-2">
+        <div class="panel-title"><h3>回复</h3></div>
+        <form method="post" action="{url('/user/ticket/' . $ticket.id . '/reply')}">
+          {csrf}
+          <div class="form-row"><textarea name="message" rows="5" required placeholder="补充说明或回复客服"></textarea></div>
+          <button class="btn btn-primary" type="submit">发送回复</button>
+        </form>
+      </div>
+      {else}
+      <div class="alert info mt-2">该工单已关闭。如需继续协助，请新建工单。</div>
+      {/if}
+    </main>
+  </div>
+</div>
+{include footer}

@@ -1,0 +1,87 @@
+{include header}
+<div class="adm-head">
+  <div><h1>经营报表</h1><p>{$year} 年度收入、订单与客户分析</p></div>
+  <form method="get" action="{admin_url('/reports')}" class="flex">
+    <select name="year" style="width:120px">
+      {loop range(2023, date('Y') + 1) as $y}
+      <option value="{$y}" {if $year == $y}selected{/if}>{$y} 年</option>
+      {/loop}
+    </select>
+    <button class="btn" type="submit">查看</button>
+  </form>
+</div>
+
+<div class="grid-4">
+  <div class="stat"><div class="label">年度收入</div><div class="value">{money($revenue)}</div><div class="sub">不含余额充值</div></div>
+  <div class="stat"><div class="label">年度订单</div><div class="value">{$orders}</div><div class="sub">含续费订单</div></div>
+  <div class="stat"><div class="label">新增客户</div><div class="value">{$clients}</div><div class="sub">注册即计入</div></div>
+  <div class="stat"><div class="label">退款 / 税费</div><div class="value">{money($refunds)}</div><div class="sub">代收税费 {money($tax)}</div></div>
+</div>
+
+<div class="card mt-3">
+  <div class="card-title"><h3>月度收入</h3><span class="small muted">{$year}</span></div>
+  <div class="bars" style="height:200px">
+    {loop $monthly as $m}
+    <div class="bar-col">
+      <div class="bar" style="height:{$m.percent}%" title="{money($m.amount)} / {$m.orders} 单"></div>
+      <div class="bar-label">{$m.month}月</div>
+    </div>
+    {/loop}
+  </div>
+</div>
+
+<div class="grid-2 mt-3">
+  <div class="card">
+    <div class="card-title"><h3>订单状态分布</h3></div>
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>状态</th><th class="num">数量</th><th class="num">金额</th></tr></thead>
+      <tbody>
+        {loop $byStatus as $s}
+        <tr><td><span class="badge {status_class($s.status)}">{status_text($s.status)}</span></td>
+        <td class="num">{$s.c}</td><td class="num">{money($s.s)}</td></tr>
+        {/loop}
+        {if !$byStatus}<tr><td colspan="3" class="empty">暂无数据</td></tr>{/if}
+      </tbody>
+    </table></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><h3>支付渠道</h3></div>
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>网关</th><th class="num">笔数</th><th class="num">金额</th></tr></thead>
+      <tbody>
+        {loop $gateways as $g}
+        <tr><td>{$g.gateway}</td><td class="num">{$g.c}</td><td class="num">{money($g.s)}</td></tr>
+        {/loop}
+        {if !$gateways}<tr><td colspan="3" class="empty">暂无数据</td></tr>{/if}
+      </tbody>
+    </table></div>
+  </div>
+</div>
+
+<div class="grid-2 mt-3">
+  <div class="card">
+    <div class="card-title"><h3>热销产品</h3></div>
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>产品</th><th class="num">销量</th><th class="num">金额</th></tr></thead>
+      <tbody>
+        {loop $topProducts as $p}
+        <tr><td>{$p.name}</td><td class="num">{$p.c}</td><td class="num">{money($p.s)}</td></tr>
+        {/loop}
+        {if !$topProducts}<tr><td colspan="3" class="empty">暂无数据</td></tr>{/if}
+      </tbody>
+    </table></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><h3>消费排行</h3></div>
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>客户</th><th class="num">订单</th><th class="num">金额</th></tr></thead>
+      <tbody>
+        {loop $topClients as $c}
+        <tr><td><a href="{admin_url('/client/' . $c.user_id)}">{$c.email}</a></td><td class="num">{$c.c}</td><td class="num">{money($c.s)}</td></tr>
+        {/loop}
+        {if !$topClients}<tr><td colspan="3" class="empty">暂无数据</td></tr>{/if}
+      </tbody>
+    </table></div>
+  </div>
+</div>
+{include footer}

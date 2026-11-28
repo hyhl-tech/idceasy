@@ -1,0 +1,29 @@
+{include header}
+<div class="adm-head"><div><h1>添加域名</h1><p>用于手工导入已在其他注册商注册的域名，或创建待注册记录。</p></div><a class="btn" href="{admin_url('/domains')}">返回列表</a></div>
+<div class="card" style="max-width:820px">
+  <form method="post" action="{admin_url('/domain/create')}">
+    {csrf}
+    <div class="form-grid">
+      <div class="form-row"><label>域名 <span style="color:var(--danger)">*</span></label><input type="text" name="domain" placeholder="example.com" required></div>
+      <div class="form-row"><label>客户 ID <span style="color:var(--danger)">*</span></label><input type="number" name="user_id" required>
+        <div class="form-help">客户 ID 可在客户列表中查看。</div>
+      </div>
+      <div class="form-row"><label>注册商</label>
+        <input type="text" name="registrar" placeholder="留空使用后缀默认注册商">
+      </div>
+      <div class="form-row"><label>到期时间</label><input type="text" name="expire_date" placeholder="2027-01-01 00:00:00"></div>
+      <div class="form-row"><label>状态</label>
+        <select name="status">
+          <option value="pending">待注册</option>
+          <option value="active">正常（已存在）</option>
+          <option value="expired">已过期</option>
+        </select>
+      </div>
+      <div class="form-row"><label>自动续费</label>
+        <label class="check" style="margin-top:8px"><input type="checkbox" name="auto_renew" value="1" checked> 到期前生成续费账单</label>
+      </div>
+    </div>
+    <div class="form-actions"><button class="btn btn-primary" type="submit">保存</button><a class="btn" href="{admin_url('/domains')}">取消</a></div>
+  </form>
+</div>
+{include footer}

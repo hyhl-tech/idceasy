@@ -1,0 +1,68 @@
+{include header}
+<section class="section" style="padding-bottom:20px">
+  <div class="container">
+    <div class="small muted" style="margin-bottom:10px"><a href="{url('/invoice')}">我的账单</a> / {$invoice.invoice_no}</div>
+    <div class="page-head">
+      <h1>账单 {$invoice.invoice_no}</h1>
+      <div class="flex">
+        <a class="btn btn-ghost btn-sm" href="{url('/invoice/' . $invoice.id . '/print')}" target="_blank">打印 / 导出</a>
+        {if $invoice.status == 'unpaid'}<a class="btn btn-primary btn-sm" href="{url('/invoice/' . $invoice.id . '/pay')}">立即支付</a>{/if}
+      </div>
+    </div>
+    <div class="grid" style="grid-template-columns:1.6fr 1fr;gap:24px;align-items:start">
+      <div class="card">
+        <div class="flex-between mb-2">
+          <span class="badge {status_class($invoice.status)}">{status_text($invoice.status)}</span>
+          <span class="small muted">到期 {date('Y-m-d', strtotime($invoice.due_at))}</span>
+        </div>
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>项目</th><th class="num">金额</th></tr></thead>
+            <tbody>
+              {loop $items as $item}
+              <tr><td>{$item.description}</td><td class="num">{money($item.amount * $item.qty)}</td></tr>
+              {/loop}
+            </tbody>
+          </table>
+        </div>
+        <div style="max-width:320px;margin-left:auto;margin-top:18px">
+          <div class="summary-row"><span class="muted">小计</span><span>{money($invoice.subtotal)}</span></div>
+          {if $invoice.discount > 0}<div class="summary-row"><span class="muted">优惠</span><span style="color:var(--ok)">-{money($invoice.discount)}</span></div>{/if}
+          {if $invoice.tax > 0}<div class="summary-row"><span class="muted">税费</span><span>{money($invoice.tax)}</span></div>{/if}
+          <div class="summary-row total"><span>应付</span><span>{money($invoice.total)}</span></div>
+          <div class="summary-row"><span class="muted">已付</span><span>{money($invoice.paid)}</span></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <h3 style="font-size:15px;margin-bottom:12px">账单信息</h3>
+          <div class="kv">
+            <span class="k">账单号</span><span class="v">{$invoice.invoice_no}</span>
+            <span class="k">创建时间</span><span class="v">{$invoice.created_at}</span>
+            <span class="k">支付时间</span><span class="v">{if $invoice.paid_at}{$invoice.paid_at}{else}-{/if}</span>
+            <span class="k">订单</span><span class="v">{if $order}<a href="{url('/order/' . $order.id)}">{$order.order_no}</a>{else}-{/if}</span>
+            {if $invoice.note}<span class="k">备注</span><span class="v">{str_replace('[TOPUP] ', '', $invoice.note)}</span>{/if}
+          </div>
+        </div>
+        <div class="card mt-2">
+          <h3 style="font-size:15px;margin-bottom:12px">支付记录</h3>
+          {loop $transactions as $t}
+          <div class="flex-between" style="padding:8px 0;border-bottom:1px solid var(--line);font-size:13px">
+            <div>
+              <div>{$t.gateway}</div>
+              <div class="small muted">{$t.created_at}</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-weight:600">{money($t.amount)}</div>
+              <div class="small muted">{$t.trade_no}</div>
+            </div>
+          </div>
+          {/loop}
+          {if !$transactions}<p class="small muted" style="margin:0">暂无支付记录。</p>{/if}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{include footer}

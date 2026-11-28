@@ -1,0 +1,38 @@
+{include header}
+<div class="container">
+  <div class="uc-layout">
+    {include user/sidebar}
+    <main class="uc-main">
+      <div class="page-head"><h1>余额充值</h1><span class="small muted">当前余额 {money($user.balance)}</span></div>
+      <div class="grid" style="grid-template-columns:1.2fr 1fr;gap:18px;align-items:start">
+        <div class="panel">
+          <h3 style="font-size:16px;margin-bottom:6px">充值金额</h3>
+          <p class="small muted">充值到账后可用于支付账单、续费服务。余额不支持提现，退款请提交工单。</p>
+          <form method="post" action="{url('/user/topup')}">
+            {csrf}
+            <div class="form-row">
+              <label>金额（元）</label>
+              <input type="number" step="0.01" min="1" max="100000" name="amount" value="100" required>
+            </div>
+            <div class="flex" style="flex-wrap:wrap;margin-bottom:14px">
+              {loop [50,100,200,500,1000] as $amt}
+              <button class="btn btn-ghost btn-sm" type="button" onclick="document.querySelector('input[name=amount]').value={$amt}">{$amt} 元</button>
+              {/loop}
+            </div>
+            <button class="btn btn-primary" type="submit">生成充值账单</button>
+          </form>
+        </div>
+        <div class="panel">
+          <h3 style="font-size:16px;margin-bottom:10px">说明</h3>
+          <ul class="feature-list" style="margin:0">
+            <li>充值账单与普通账单一样支持在线支付</li>
+            <li>支付成功后余额自动到账，无需人工确认</li>
+            <li>充值金额仅用于消费，不可提现</li>
+            <li>企业客户可申请对公转账与月结</li>
+          </ul>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+{include footer}

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{if !empty($title)}{$title} - {/if}{$siteName}</title>
+<meta name="description" content="{$siteName} - {cfg('site_slogan','云计算与域名服务')}">
+<link rel="stylesheet" href="{asset('css/style.css')}">
+</head>
+<body>
+<header class="site-header">
+  <div class="container">
+    <a class="logo" href="{url('/')}">
+      <span class="logo-mark">i</span>
+      <span>{$siteName}</span>
+    </a>
+    <nav class="nav">
+      {loop $menu as $m}
+      <a href="{$m.url}">{$m.title}</a>
+      {/loop}
+    </nav>
+    <div class="header-actions">
+      <a class="btn btn-ghost btn-sm" href="{url('/cart')}">购物车{if !empty($cartCount)} ({$cartCount}){/if}</a>
+      {if !empty($user)}
+      <a class="btn btn-ghost btn-sm" href="{url('/user')}">会员中心</a>
+      <a class="btn btn-primary btn-sm" href="{url('/logout')}">退出</a>
+      {else}
+      <a class="btn btn-ghost btn-sm" href="{url('/login')}">登录</a>
+      <a class="btn btn-primary btn-sm" href="{url('/register')}">免费注册</a>
+      {/if}
+      <button class="nav-toggle" data-nav-toggle type="button" aria-label="菜单">☰</button>
+    </div>
+  </div>
+</header>
+{if !empty($flashOk)}<div class="container" style="margin-top:16px"><div class="alert ok">{$flashOk}</div></div>{/if}
+{if !empty($flashErr)}<div class="container" style="margin-top:16px"><div class="alert error">{$flashErr}</div></div>{/if}

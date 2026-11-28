@@ -1,0 +1,53 @@
+{include header}
+<div class="container">
+  <div class="uc-layout">
+    {include user/sidebar}
+    <main class="uc-main">
+      <div class="small muted" style="margin-bottom:8px"><a href="{url('/user/service/' . $host.id)}">{$host.domain}</a> / 升级配置</div>
+      <div class="page-head"><h1>升级配置</h1></div>
+      <div class="grid" style="grid-template-columns:1.3fr 1fr;gap:18px;align-items:start">
+        <div class="panel">
+          <form method="post" action="{url('/user/service/' . $host.id . '/upgrade')}">
+            {csrf}
+            <div class="form-row">
+              <label>目标产品</label>
+              <select name="product_id" required>
+                <option value="">请选择</option>
+                {loop $targets as $t}
+                <option value="{$t.id}" {if $newId == $t.id}selected{/if}>{$t.name}</option>
+                {/loop}
+              </select>
+            </div>
+            <div class="form-row">
+              <label>计费周期</label>
+              <select name="cycle">
+                {loop ['monthly','quarterly','semiannual','annual'] as $c}
+                <option value="{$c}" {if $newCycle == $c}selected{/if}>{cycle_text($c)}</option>
+                {/loop}
+              </select>
+            </div>
+            <button class="btn btn-ghost" type="submit" name="preview" value="1">计算差价</button>
+            <button class="btn btn-primary" type="submit">确认升级</button>
+          </form>
+          <div class="form-help mt-2">升级按剩余天数折算旧服务价值，差价生成账单；支付后新配置立即生效。降配不退款，请谨慎操作。</div>
+        </div>
+        <div class="panel">
+          <h3 style="font-size:15px;margin-bottom:12px">当前服务</h3>
+          <div class="kv">
+            <span class="k">产品</span><span class="v">{$product.name}</span>
+            <span class="k">周期</span><span class="v">{cycle_text($host.cycle)}</span>
+            <span class="k">下次到期</span><span class="v">{$host.next_due}</span>
+          </div>
+          {if $quote && $quote.ok}
+          <hr style="border:0;border-top:1px solid var(--line);margin:16px 0">
+          <h3 style="font-size:15px;margin-bottom:12px">差价预估</h3>
+          <div class="summary-row"><span class="muted">新套餐价格</span><span>{money($quote.new_price)}</span></div>
+          <div class="summary-row"><span class="muted">剩余价值抵扣</span><span style="color:var(--ok)">-{money($quote.credit)}</span></div>
+          <div class="summary-row total"><span>需支付</span><span>{money($quote.payable)}</span></div>
+          {/if}
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+{include footer}

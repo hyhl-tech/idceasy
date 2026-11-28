@@ -1,0 +1,33 @@
+{include header}
+<div class="auth-wrap">
+  <div class="auth-card" style="max-width:480px">
+    <h1>创建账户</h1>
+    <p class="sub">注册后即可下单、管理域名与提交工单。</p>
+    {if $closed}
+    <div class="alert warn">当前站点已关闭注册，请联系客服开通账户。</div>
+    <a class="btn btn-primary" href="{url('/login')}">返回登录</a>
+    {else}
+    <form method="post" action="{url('/register')}">
+      {csrf}
+      <input type="hidden" name="ref" value="{$ref}">
+      <div class="form-row"><label>邮箱</label><input type="email" name="email" required autocomplete="email"></div>
+      <div class="form-grid">
+        <div class="form-row"><label>姓名</label><input type="text" name="name" autocomplete="name"></div>
+        <div class="form-row"><label>手机号</label><input type="text" name="phone" autocomplete="tel"></div>
+      </div>
+      <div class="form-row"><label>公司（可选）</label><input type="text" name="company" autocomplete="organization"></div>
+      <div class="form-grid">
+        <div class="form-row"><label>密码</label><input type="password" name="password" required minlength="8" autocomplete="new-password"></div>
+        <div class="form-row"><label>确认密码</label><input type="password" name="password2" required minlength="8" autocomplete="new-password"></div>
+      </div>
+      <label class="check mt-2">
+        <input type="checkbox" name="agree" value="1" required>
+        <span>我同意 <a href="{url('/page/terms')}" target="_blank">服务条款</a> 与 <a href="{url('/page/privacy')}" target="_blank">隐私政策</a></span>
+      </label>
+      <button class="btn btn-primary" type="submit">注册</button>
+    </form>
+    <div class="auth-foot">已有账户？<a href="{url('/login')}">直接登录</a></div>
+    {/if}
+  </div>
+</div>
+{include footer}

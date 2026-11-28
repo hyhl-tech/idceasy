@@ -1,0 +1,20 @@
+{include header}
+<div class="auth-wrap">
+  <div class="auth-card">
+    <h1>登录账户</h1>
+    <p class="sub">管理你的服务、账单与域名。</p>
+    <form method="post" action="{url('/login')}">
+      {csrf}
+      <input type="hidden" name="redirect" value="{$redirect}">
+      <div class="form-row"><label>邮箱</label><input type="email" name="email" required autofocus autocomplete="email"></div>
+      <div class="form-row"><label>密码</label><input type="password" name="password" required autocomplete="current-password"></div>
+      <div class="flex-between" style="margin:8px 0 4px">
+        <label class="check" style="margin:0"><input type="checkbox" name="remember" value="1"> 记住我</label>
+        <a class="small" href="{url('/forgot')}">忘记密码？</a>
+      </div>
+      <button class="btn btn-primary" type="submit">登录</button>
+    </form>
+    <div class="auth-foot">还没有账户？<a href="{url('/register')}">立即注册</a></div>
+  </div>
+</div>
+{include footer}

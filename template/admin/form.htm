@@ -1,0 +1,48 @@
+{include header}
+<div class="adm-head">
+  <div><h1>{$title}</h1>{if !empty($note)}<p>{$note}</p>{/if}</div>
+  <a class="btn" href="{$cancel}">返回列表</a>
+</div>
+<div class="card" style="max-width:900px">
+  <form method="post" action="{$action}">
+    {csrf}
+    <div class="form-grid">
+      {loop $fields as $field}
+      {if $field.type == 'hidden'}
+      <input type="hidden" name="{$field.name}" value="{arr_get($values, $field.name)}">
+      {else}
+      <div class="form-row {if $field.type == 'textarea' || $field.type == 'code'}full{/if}">
+        {if $field.type != 'checkbox'}<label>{$field.label}{if $field.required} <span style="color:var(--danger)">*</span>{/if}</label>{/if}
+        {if $field.type == 'textarea'}
+        <textarea name="{$field.name}" rows="{$field.rows ?? 5}" {if $field.required}required{/if}>{arr_get($values, $field.name)}</textarea>
+        {elseif $field.type == 'code'}
+        <textarea class="code-input" name="{$field.name}" rows="{$field.rows ?? 10}" {if $field.required}required{/if}>{arr_get($values, $field.name)}</textarea>
+        {elseif $field.type == 'select'}
+        <select name="{$field.name}" {if $field.required}required{/if}>
+          {loop $field.options as $val => $label}
+          <option value="{$val}" {if arr_get($values, $field.name) == $val}selected{/if}>{$label}</option>
+          {/loop}
+        </select>
+        {elseif $field.type == 'checkbox'}
+        <label class="check"><input type="checkbox" name="{$field.name}" value="1" {if arr_get($values, $field.name)}checked{/if}> {$field.label}</label>
+        {elseif $field.type == 'password'}
+        <input type="password" name="{$field.name}" {if $field.required_on_create}required{/if} autocomplete="new-password" placeholder="留空表示不修改">
+        {elseif $field.type == 'number' || $field.type == 'money'}
+        <input type="number" step="{if $field.type == 'money'}0.01{else}1{/if}" name="{$field.name}" value="{arr_get($values, $field.name)}">
+        {elseif $field.type == 'datetime'}
+        <input type="datetime-local" name="{$field.name}" value="{arr_get($values, $field.name)}">
+        {else}
+        <input type="text" name="{$field.name}" value="{arr_get($values, $field.name)}" {if $field.required}required{/if}>
+        {/if}
+        {if $field.help}<div class="form-help">{$field.help}</div>{/if}
+      </div>
+      {/if}
+      {/loop}
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">保存</button>
+      <a class="btn" href="{$cancel}">取消</a>
+    </div>
+  </form>
+</div>
+{include footer}

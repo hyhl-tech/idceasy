@@ -1,0 +1,13 @@
+{include header}
+<section class="section">
+  <div class="container" style="max-width:860px">
+    <div class="small muted" style="margin-bottom:10px"><a href="{url('/announcements')}">公告</a> / {$item.title}</div>
+    <div class="card">
+      <h1 style="font-size:26px">{$item.title}</h1>
+      <p class="small muted">{date('Y-m-d H:i', strtotime($item.created_at))} · {$item.views} 次浏览</p>
+      <div style="line-height:1.9;margin-top:16px">{:($item.content)}</div>
+    </div>
+    <div class="mt-2"><a class="btn btn-ghost" href="{url('/announcements')}">返回公告列表</a></div>
+  </div>
+</section>
+{include footer}

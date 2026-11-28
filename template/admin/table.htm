@@ -1,0 +1,100 @@
+{include header}
+<div class="adm-head">
+  <div>
+    <h1>{$title}</h1>
+    <p>共 {$rows.total} 条记录</p>
+  </div>
+  <div class="flex">
+    {if $topActions}
+    {loop $topActions as $action}
+    <a class="btn {$action.class}" href="{$action.url}">{$action.label}</a>
+    {/loop}
+    {/if}
+  </div>
+</div>
+
+{if $tabs}
+<div class="tabs">
+  {loop $tabs as $tab}
+  <a class="{if $tab.active}active{/if}" href="{$tab.url}">{$tab.title}</a>
+  {/loop}
+</div>
+{/if}
+
+<div class="card" style="padding:0;overflow:hidden">
+  {if $filters}
+  <form method="get" action="{$baseUrl}" class="flex" style="padding:14px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap">
+    {loop $filters as $filter}
+      {if $filter.type == 'select'}
+      <select name="{$filter.name}" style="width:160px;min-height:34px">
+        <option value="">全部</option>
+        {loop $filter.options as $val => $label}
+        <option value="{$val}" {if $filter.value == $val}selected{/if}>{$label}</option>
+        {/loop}
+      </select>
+      {else}
+      <input type="text" name="{$filter.name}" value="{$filter.value}" placeholder="{$filter.placeholder}" style="width:240px;min-height:34px">
+      {/if}
+    {/loop}
+    <button class="btn btn-primary btn-sm" type="submit">筛选</button>
+  </form>
+  {/if}
+
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          {loop $columns as $col}
+          <th>{$col.label}</th>
+          {/loop}
+          {if $rowLinks || $rowDelete}<th class="actions">操作</th>{/if}
+        </tr>
+      </thead>
+      <tbody>
+        {loop $rows.data as $row}
+        <tr>
+          {loop $columns as $col}
+          <td>
+            {if $col.type == 'money'}
+              {money(arr_get($row, $col.field))}
+            {elseif $col.type == 'date'}
+              <span class="small muted">{date_format_str(arr_get($row, $col.field), 'Y-m-d H:i')}</span>
+            {elseif $col.type == 'status'}
+              <span class="badge {status_class(arr_get($row, $col.field))}">{status_text(arr_get($row, $col.field))}</span>
+            {elseif $col.type == 'bool'}
+              {if arr_get($row, $col.field)}<span class="badge ok">是</span>{else}<span class="badge muted">否</span>{/if}
+            {elseif $col.type == 'map'}
+              {option_label($col.options, arr_get($row, $col.field))}
+            {elseif $col.type == 'bytes'}
+              {format_bytes(arr_get($row, $col.field))}
+            {elseif $col.type == 'excerpt'}
+              <span class="small muted">{mb_substr(strip_tags((string)arr_get($row, $col.field)), 0, 60)}</span>
+            {else}
+              {arr_get($row, $col.field)}
+            {/if}
+          </td>
+          {/loop}
+          {if $rowLinks || $rowDelete}
+          <td class="actions">
+            {loop $rowLinks as $link}
+            <a href="{str_replace('__ID__', $row.id, $link.url)}">{$link.label}</a>
+            {/loop}
+            {if $rowDelete}
+            <form method="post" action="{str_replace('__ID__', $row.id, $deleteUrl)}" style="display:inline" data-confirm="确定删除该记录？此操作不可撤销。">
+              {csrf}
+              <button type="submit" class="btn btn-sm btn-danger" style="margin-left:8px">删除</button>
+            </form>
+            {/if}
+          </td>
+          {/if}
+        </tr>
+        {/loop}
+        {if !$rows.data}
+        <tr><td colspan="12" class="empty">暂无数据</td></tr>
+        {/if}
+      </tbody>
+    </table>
+  </div>
+</div>
+{paginate_links($rows, $baseUrl)}
+{include footer}

@@ -1,0 +1,30 @@
+{include header}
+<div class="container">
+  <div class="uc-layout">
+    {include user/sidebar}
+    <main class="uc-main">
+      <div class="page-head"><h1>资金记录</h1><span class="small muted">当前余额 {money($user.balance)}</span></div>
+      <div class="panel" style="padding:0;overflow:hidden">
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>时间</th><th>类型</th><th>交易号</th><th>备注</th><th class="num">金额</th></tr></thead>
+            <tbody>
+              {loop $list.data as $t}
+              <tr>
+                <td>{$t.created_at}</td>
+                <td>{$t.gateway}</td>
+                <td class="small muted">{$t.trade_no}</td>
+                <td class="small muted">{$t.remark}</td>
+                <td class="num" style="color:{if $t.amount < 0}var(--danger){else}var(--ok){/if};font-weight:600">{money($t.amount)}</td>
+              </tr>
+              {/loop}
+              {if !$list.data}<tr><td colspan="5" class="center muted" style="padding:36px">暂无资金记录</td></tr>{/if}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {paginate_links($list, url('/user/transactions'))}
+    </main>
+  </div>
+</div>
+{include footer}

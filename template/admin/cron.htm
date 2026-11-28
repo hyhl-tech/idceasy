@@ -1,0 +1,68 @@
+{include header}
+<div class="adm-head">
+  <div><h1>定时任务</h1><p>生产环境建议使用系统 crontab 每分钟执行一次。</p></div>
+  <form method="post" action="{admin_url('/cron/run')}" data-confirm="立即执行全部任务？">
+    {csrf}<input type="hidden" name="task" value="all">
+    <button class="btn btn-primary" type="submit">全部执行</button>
+  </form>
+</div>
+
+<div class="card" style="margin-bottom:18px">
+  <div class="card-title"><h3>任务地址</h3><span class="small muted">含密钥，请勿公开</span></div>
+  <div class="mono pre-wrap" style="background:#f9fafb;border:1px solid var(--line);border-radius:9px;padding:10px;font-size:12px">{$cronUrl}</div>
+  <div class="flex mt-2">
+    <button class="btn btn-sm" type="button" data-copy="{$cronUrl}">复制地址</button>
+    <a class="btn btn-sm" href="{admin_url('/settings', ['tab' => 'api'])}">重置令牌</a>
+  </div>
+  <div class="form-help mt-2">示例 crontab：<code>* * * * * curl -s "{$cronUrl}" &gt; /dev/null</code></div>
+</div>
+
+<div class="card" style="padding:0;overflow:hidden;margin-bottom:18px">
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>任务</th><th>说明</th><th>上次执行</th><th class="actions">操作</th></tr></thead>
+      <tbody>
+        {loop $defs as $key => $def}
+        <tr>
+          <td><strong>{$def.title}</strong><div class="small muted mono">{$key}</div></td>
+          <td class="small muted">{$def.desc}</td>
+          <td class="small">
+            {if $def.last}
+            <span class="badge {if $def.last.status == 'success'}ok{else}danger{/if}">{if $def.last.status == 'success'}成功{else}失败{/if}</span>
+            <div class="muted">{$def.last.created_at} · {$def.last.duration}s</div>
+            {else}<span class="muted">未执行</span>{/if}
+          </td>
+          <td class="actions">
+            <form method="post" action="{admin_url('/cron/run')}" style="display:inline">
+              {csrf}<input type="hidden" name="task" value="{$key}">
+              <button class="btn btn-sm" type="submit">执行</button>
+            </form>
+          </td>
+        </tr>
+        {/loop}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card" style="padding:0;overflow:hidden">
+  <div style="padding:14px 16px;border-bottom:1px solid var(--line);font-weight:600">最近执行记录</div>
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>时间</th><th>任务</th><th>状态</th><th>输出</th><th class="num">耗时</th></tr></thead>
+      <tbody>
+        {loop $logs as $log}
+        <tr>
+          <td class="small muted">{$log.created_at}</td>
+          <td class="mono small">{$log.task}</td>
+          <td><span class="badge {if $log.status == 'success'}ok{else}danger{/if}">{if $log.status == 'success'}成功{else}失败{/if}</span></td>
+          <td class="small muted">{$log.output}</td>
+          <td class="num small">{$log.duration}s</td>
+        </tr>
+        {/loop}
+        {if !$logs}<tr><td colspan="5" class="empty">暂无执行记录</td></tr>{/if}
+      </tbody>
+    </table>
+  </div>
+</div>
+{include footer}

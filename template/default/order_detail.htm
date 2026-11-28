@@ -1,0 +1,53 @@
+{include header}
+<section class="section" style="padding-bottom:20px">
+  <div class="container">
+    <div class="small muted" style="margin-bottom:10px"><a href="{url('/order')}">我的订单</a> / {$order.order_no}</div>
+    <div class="page-head">
+      <h1>订单 {$order.order_no}</h1>
+      <div class="flex">
+        <span class="badge {status_class($order.status)}">{status_text($order.status)}</span>
+        {if $invoice}<a class="btn btn-primary btn-sm" href="{url('/invoice/' . $invoice.id . '/pay')}">去支付</a>{/if}
+      </div>
+    </div>
+    <div class="grid" style="grid-template-columns:1.6fr 1fr;gap:24px;align-items:start">
+      <div class="card">
+        <div class="panel-title"><h3>订单项目</h3></div>
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>项目</th><th>周期</th><th class="num">金额</th><th>服务</th></tr></thead>
+            <tbody>
+              {loop $items as $item}
+              <tr>
+                <td>{$item.domain}{if !$item.domain}{$item.type}{/if}</td>
+                <td>{cycle_text($item.cycle)}</td>
+                <td class="num">{money($item.amount)}</td>
+                <td>
+                  {if $item.host_id}<a href="{url('/user/service/' . $item.host_id)}">管理</a>{/if}
+                  {if $item.domain_id}<a href="{url('/user/domain/' . $item.domain_id)}">管理</a>{/if}
+                  {if !$item.host_id && !$item.domain_id}<span class="small muted">待开通</span>{/if}
+                </td>
+              </tr>
+              {/loop}
+            </tbody>
+          </table>
+        </div>
+        <div style="max-width:300px;margin-left:auto;margin-top:16px">
+          <div class="summary-row"><span class="muted">订单金额</span><span>{money($order.total)}</span></div>
+          <div class="summary-row"><span class="muted">已付</span><span>{money($order.paid_amount)}</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="font-size:15px;margin-bottom:12px">订单信息</h3>
+        <div class="kv">
+          <span class="k">订单号</span><span class="v">{$order.order_no}</span>
+          <span class="k">状态</span><span class="v">{status_text($order.status)}</span>
+          <span class="k">创建时间</span><span class="v">{$order.created_at}</span>
+          <span class="k">支付时间</span><span class="v">{if $order.paid_at}{$order.paid_at}{else}-{/if}</span>
+          <span class="k">账单</span><span class="v">{if $invoice}<a href="{url('/invoice/' . $invoice.id)}">{$invoice.invoice_no}</a>{else}-{/if}</span>
+          {if $order.note}<span class="k">备注</span><span class="v">{$order.note}</span>{/if}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{include footer}

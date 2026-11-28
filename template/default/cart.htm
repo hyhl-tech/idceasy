@@ -1,0 +1,84 @@
+{include header}
+<section class="section" style="padding-bottom:20px">
+  <div class="container">
+    <div class="page-head"><h1>购物车</h1><a class="btn btn-ghost btn-sm" href="{url('/products')}">继续选购</a></div>
+    {if !$items}
+    <div class="card center" style="padding:56px">
+      <h3>购物车是空的</h3>
+      <p class="muted">先去挑选一台主机，或者查询一个域名。</p>
+      <a class="btn btn-primary" href="{url('/products')}">浏览产品</a>
+    </div>
+    {else}
+    <div class="grid" style="grid-template-columns:1.6fr 1fr;gap:24px;align-items:start">
+      <div class="card">
+        <div class="panel-title"><h3>商品明细</h3><span class="small muted">共 {count($items)} 项</span></div>
+        {loop $items as $item}
+        <div class="cart-item">
+          <div>
+            <div style="font-weight:600;color:var(--ink)">{$item.name}</div>
+            <div class="small muted" style="margin-top:2px">
+              {if $item.type == 'domain'}
+              注册年限：{$item.cycle_text}
+              {else}
+              周期：{$item.cycle_text}
+              {if $item.option_names} · {$item.option_names}{/if}
+              {if $item.domain} · {$item.domain}{/if}
+              {/if}
+            </div>
+            <div class="small muted" style="margin-top:4px">单价 {money($item.price)}{if $item.setup_fee > 0} + 设置费 {money($item.setup_fee)}{/if}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-weight:700;color:var(--ink);margin-bottom:8px">{money($item.amount)}</div>
+            <div class="flex" style="justify-content:flex-end;gap:6px">
+              {if $item.type != 'domain'}
+              <form method="post" action="{url('/cart/update')}" class="flex" style="gap:4px">
+                {csrf}
+                <input type="hidden" name="key" value="{$item.key}">
+                <input class="qty" type="number" name="qty" value="{$item.qty}" min="1" max="10">
+                <button class="btn btn-sm btn-ghost" type="submit">更新</button>
+              </form>
+              {/if}
+              <form method="post" action="{url('/cart/remove')}">
+                {csrf}
+                <input type="hidden" name="key" value="{$item.key}">
+                <button class="btn btn-sm btn-danger" type="submit">移除</button>
+              </form>
+            </div>
+          </div>
+        </div>
+        {/loop}
+        <div class="mt-2 flex-between">
+          <form method="post" action="{url('/cart/clear')}" data-confirm="确定清空购物车？">
+            {csrf}
+            <button class="btn btn-sm btn-ghost" type="submit">清空</button>
+          </form>
+          <span class="small muted">价格不含税费，最终金额以结算页为准</span>
+        </div>
+      </div>
+
+      <div class="card" style="position:sticky;top:88px">
+        <h3 style="margin-bottom:14px">订单摘要</h3>
+        <div class="summary-row"><span class="muted">小计</span><span>{money($subtotal)}</span></div>
+        {if $discount > 0}
+        <div class="summary-row"><span class="muted">优惠</span><span style="color:var(--ok)">-{money($discount)}</span></div>
+        {/if}
+        <div class="summary-row total"><span>应付</span><span>{money($subtotal - $discount)}</span></div>
+
+        <form method="post" action="{url('/cart/coupon')}" style="margin-top:16px">
+          {csrf}
+          <label>优惠码</label>
+          <div class="flex" style="gap:8px">
+            <input type="text" name="code" value="{$coupon}" placeholder="输入优惠码">
+            <button class="btn btn-ghost" type="submit">应用</button>
+          </div>
+          {if $couponError}<div class="form-help" style="color:var(--danger)">{$couponError}</div>{/if}
+        </form>
+
+        <a class="btn btn-primary btn-lg btn-block mt-3" href="{url('/checkout')}">去结算</a>
+        <div class="form-help center" style="margin-top:8px">支持余额、支付宝、微信、PayPal、Stripe 等</div>
+      </div>
+    </div>
+    {/if}
+  </div>
+</section>
+{include footer}

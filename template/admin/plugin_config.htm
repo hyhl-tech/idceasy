@@ -1,0 +1,49 @@
+{include header}
+<div class="adm-head">
+  <div>
+    <h1>{$info.title}</h1>
+    <p>{$info.description} · v{$info.version} · <span class="mono">{$type}/{$name}</span></p>
+  </div>
+  <a class="btn" href="{admin_url('/plugins')}">返回插件</a>
+</div>
+<div class="card" style="max-width:760px">
+  {if $fields}
+  <form method="post" action="{admin_url('/plugin/' . $type . '/' . $name)}">
+    {csrf}
+    {loop $fields as $field}
+    <div class="form-row">
+      <label>{$field.label}{if $field.required} <span style="color:var(--danger)">*</span>{/if}</label>
+      {if $field.type == 'select'}
+      <select name="{$field.name}">
+        {loop $field.options as $val => $label}
+        <option value="{$val}" {if arr_get($config, $field.name) == $val}selected{/if}>{$label}</option>
+        {/loop}
+      </select>
+      {elseif $field.type == 'textarea'}
+      <textarea name="{$field.name}" rows="3">{arr_get($config, $field.name)}</textarea>
+      {elseif $field.type == 'password'}
+      <input type="password" name="{$field.name}" placeholder="已保存，留空不修改">
+      {elseif $field.type == 'checkbox'}
+      <label class="check"><input type="checkbox" name="{$field.name}" value="1" {if arr_get($config, $field.name)}checked{/if}> 启用</label>
+      {else}
+      <input type="text" name="{$field.name}" value="{arr_get($config, $field.name)}">
+      {/if}
+      {if $field.help}<div class="form-help">{$field.help}</div>{/if}
+    </div>
+    {/loop}
+    <label class="check"><input type="checkbox" name="enabled" value="1" {if $record && $record.status}checked{/if}> 启用该插件</label>
+    <div class="form-actions"><button class="btn btn-primary" type="submit">保存配置</button><a class="btn" href="{admin_url('/plugins')}">取消</a></div>
+  </form>
+  {else}
+  <p class="muted">该插件无需配置。启用后即可在对应功能中使用。</p>
+  <form method="post" action="{admin_url('/plugin/' . $type . '/' . $name)}">
+    {csrf}
+    <input type="hidden" name="enabled" value="1">
+    <button class="btn btn-primary" type="submit">启用插件</button>
+  </form>
+  {/if}
+  <div class="alert info mt-3" style="margin-bottom:0">
+    配置字段由插件自身的 <code>info()['fields']</code> 定义。新增字段后重新保存即可生效。
+  </div>
+</div>
+{include footer}

@@ -1,0 +1,49 @@
+{include header}
+<div class="container">
+  <div class="uc-layout">
+    {include user/sidebar}
+    <main class="uc-main">
+      <div class="page-head"><h1>推广联盟</h1></div>
+      {if !$aff}
+      <div class="panel" style="max-width:680px">
+        <h3>加入推广计划</h3>
+        <p class="muted">分享专属链接，客户通过链接注册并完成付款后，你将获得订单金额 {cfg('affiliate_rate','10')}% 的佣金。佣金计入联盟余额，可申请提现。</p>
+        <form method="post" action="{url('/user/affiliate')}">
+          {csrf}<button class="btn btn-primary" type="submit">立即加入</button>
+        </form>
+      </div>
+      {else}
+      <div class="stat-grid">
+        <div class="stat"><div class="label">累计佣金</div><div class="value">{money($aff.earnings)}</div></div>
+        <div class="stat"><div class="label">可提现余额</div><div class="value">{money($aff.balance)}</div></div>
+        <div class="stat"><div class="label">注册转化</div><div class="value">{$aff.signups}</div></div>
+        <div class="stat"><div class="label">佣金比例</div><div class="value">{$aff.rate}%</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title"><h3>专属推广链接</h3></div>
+        <div class="mono" style="background:#f9fafb;border:1px solid var(--line);border-radius:9px;padding:10px;word-break:break-all;font-size:12.5px">{abs_url('/register?ref=' . $aff.code)}</div>
+        <div class="flex mt-2">
+          <button class="btn btn-ghost btn-sm" type="button" data-copy="{abs_url('/register?ref=' . $aff.code)}">复制链接</button>
+          <span class="small muted">邀请码：<code>{$aff.code}</code></span>
+        </div>
+      </div>
+      <div class="panel mt-2">
+        <div class="panel-title"><h3>佣金记录</h3></div>
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>时间</th><th>订单</th><th>类型</th><th class="num">金额</th></tr></thead>
+            <tbody>
+              {loop $logs as $log}
+              <tr><td>{$log.created_at}</td><td>#{$log.order_id}</td><td>{$log.type}</td><td class="num">{money($log.amount)}</td></tr>
+              {/loop}
+              {if !$logs}<tr><td colspan="4" class="center muted">暂无佣金记录</td></tr>{/if}
+            </tbody>
+          </table>
+        </div>
+        <div class="form-help mt-2">余额满 100 元可提交工单申请提现，管理员审核后打款。</div>
+      </div>
+      {/if}
+    </main>
+  </div>
+</div>
+{include footer}

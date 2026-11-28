@@ -1,0 +1,121 @@
+{include header}
+<section class="section" style="padding-bottom:20px">
+  <div class="container">
+    <div class="small muted" style="margin-bottom:14px">
+      <a href="{url('/')}">首页</a> / <a href="{url('/products')}">产品</a>
+      {if $group} / <a href="{url('/products', ['group' => $group.id])}">{$group.name}</a>{/if} / {$product.name}
+    </div>
+    <div class="grid" style="grid-template-columns:1.5fr 1fr;align-items:start;gap:28px">
+      <div>
+        <div class="card">
+          <span class="eyebrow">{$group.name}</span>
+          <h1 style="font-size:30px;margin-bottom:10px">{$product.name}</h1>
+          <div style="color:var(--text);line-height:1.85">{:nl2br(strip_tags($product.description))}</div>
+        </div>
+        <div class="panel mt-2">
+          <div class="panel-title"><h3>计费周期</h3></div>
+          <div class="table-wrap">
+            <table class="table">
+              <thead><tr><th>周期</th><th class="num">价格</th><th class="num">设置费</th></tr></thead>
+              <tbody>
+                {loop $pricing as $pr}
+                <tr>
+                  <td>{cycle_text($pr.cycle)}</td>
+                  <td class="num"><strong>{money($pr.price)}</strong></td>
+                  <td class="num">{if $pr.setup_fee > 0}{money($pr.setup_fee)}{else}免{/if}</td>
+                </tr>
+                {/loop}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="panel mt-2">
+          <div class="panel-title"><h3>服务说明</h3></div>
+          <ul class="feature-list" style="margin:0">
+            <li>下单后自动开通，开通信息发送至账户邮箱</li>
+            <li>支持在线续费、升级配置与工单支持</li>
+            <li>7 天无理由退款（域名与已使用资源除外）</li>
+            <li>所有价格含税情况以结算页为准</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card" style="position:sticky;top:88px">
+        <h3 style="margin-bottom:14px">配置订单</h3>
+        <form method="post" action="{url('/cart/add')}">
+          {csrf}
+          <input type="hidden" name="product_id" value="{$product.id}">
+          <label>计费周期</label>
+          <div style="display:grid;gap:8px;margin-bottom:14px">
+            {loop $pricing as $pr}
+            <label class="check" style="border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:0;justify-content:space-between">
+              <span class="flex">
+                <input type="radio" name="cycle" value="{$pr.cycle}" {if $pr.cycle == 'monthly' || count($pricing) == 1}checked{/if}>
+                <span>{cycle_text($pr.cycle)}</span>
+              </span>
+              <strong>{money($pr.price)}</strong>
+            </label>
+            {/loop}
+          </div>
+
+          {if $product.type == 'domain'}
+          <div class="form-row">
+            <label>要注册的域名</label>
+            <input type="text" name="domain" placeholder="example.com" required>
+            <div class="form-help">系统按域名后缀的实时价格结算，年限由计费周期决定。</div>
+          </div>
+          {elseif $product.require_domain}
+          <div class="form-row">
+            <label>绑定域名</label>
+            <input type="text" name="domain" placeholder="example.com" required>
+            <div class="form-help">请填写已注册的域名，开通后可在面板中绑定。</div>
+          </div>
+          {/if}
+
+          {loop $options as $opt}
+          <div class="form-row">
+            <label>{$opt.name}{if $opt.required} <span style="color:var(--danger)">*</span>{/if}</label>
+            {if $opt.type == 'checkbox'}
+              {loop $opt.values as $v}
+              <label class="check" style="margin:4px 0">
+                <input type="checkbox" name="options[]" value="{$v.id}">
+                <span>{$v.name}{if $v.price > 0} <span class="muted">+{money($v.price)}</span>{/if}</span>
+              </label>
+              {/loop}
+            {else}
+              <select name="options[]" {if $opt.required}required{/if}>
+                <option value="">请选择</option>
+                {loop $opt.values as $v}
+                <option value="{$v.id}">{$v.name}{if $v.price > 0} (+{money($v.price)}){/if}</option>
+                {/loop}
+              </select>
+            {/if}
+          </div>
+          {/loop}
+
+          <div class="form-row">
+            <label>数量</label>
+            <input type="number" name="qty" value="1" min="1" max="10">
+          </div>
+          <button class="btn btn-primary btn-lg btn-block" type="submit">加入购物车</button>
+          <div class="form-help center" style="margin-top:10px">下一步可选择优惠码并使用余额或在线支付</div>
+        </form>
+      </div>
+    </div>
+
+    {if $related}
+    <div class="mt-4">
+      <div class="section-head"><div><h2 style="font-size:22px">同分类产品</h2></div></div>
+      <div class="grid grid-3">
+        {loop $related as $r}
+        <a class="card" href="{url('/product/' . $r.slug)}" style="color:inherit">
+          <h3 style="font-size:16px">{$r.name}</h3>
+          <p class="muted small" style="margin:6px 0 0">{mb_substr(strip_tags($r.description), 0, 60)}…</p>
+        </a>
+        {/loop}
+      </div>
+    </div>
+    {/if}
+  </div>
+</section>
+{include footer}

@@ -1,0 +1,69 @@
+{include header}
+<section class="section" style="padding-bottom:20px">
+  <div class="container">
+    <div style="max-width:760px;margin:0 auto 26px;text-align:center">
+      <span class="eyebrow">Domain</span>
+      <h1 style="font-size:34px">域名注册与转入</h1>
+      <p class="muted">实时连接 20+ 注册商，支持转入、续费、NS 修改与隐私保护。</p>
+      <form class="search-bar" method="get" action="{url('/domain')}" style="margin-top:18px">
+        <input type="text" name="keyword" value="{$keyword}" placeholder="输入域名，例如 idceasy.com" autocomplete="off">
+        <button class="btn btn-primary" type="submit">查询</button>
+      </form>
+      <div class="tld-chips" style="justify-content:center">
+        {loop $tlds as $t}
+        <span class="chip" data-tld="{$t.tld}">.{$t.tld}</span>
+        {/loop}
+      </div>
+    </div>
+
+    {if $results}
+      {if !$results.ok}
+      <div class="alert error">{$results.error}</div>
+      {else}
+      <div class="card card-flat" style="padding:0;overflow:hidden;max-width:860px;margin:0 auto">
+        <div style="padding:14px 18px;border-bottom:1px solid var(--line);font-size:13px;color:var(--muted)">
+          查询结果 · 共 {count($results.items)} 个后缀
+        </div>
+        {loop $results.items as $item}
+        <div class="domain-result">
+          <div>
+            <div class="domain-name">{$item.domain}</div>
+            <div class="small muted">
+              {if $item.available === true}
+                <span class="badge ok">可注册</span>
+                <span style="margin-left:6px">续费 {money($item.renew_price)} / 年</span>
+              {elseif $item.available === false}
+                <span class="badge danger">已被注册</span>
+              {else}
+                <span class="badge warn">查询失败</span>
+                {if $item.error}<span style="margin-left:6px">{$item.error}</span>{/if}
+              {/if}
+            </div>
+          </div>
+          <div style="text-align:right">
+            {if $item.available === true && !$item.premium}
+            <div style="font-size:18px;font-weight:700;color:var(--ink);margin-bottom:6px">{money($item.price)}<span class="small muted">/年</span></div>
+            <form method="post" action="{url('/domain/add')}">
+              {csrf}
+              <input type="hidden" name="domain" value="{$item.domain}">
+              <input type="hidden" name="years" value="1">
+              <button class="btn btn-primary btn-sm" type="submit">加入购物车</button>
+            </form>
+            {elseif $item.available === true && $item.premium}
+            <div class="small muted" style="max-width:180px">{$item.error}</div>
+            {/if}
+          </div>
+        </div>
+        {/loop}
+      </div>
+      {/if}
+    {/if}
+
+    <div class="grid grid-3 mt-4">
+      <div class="card"><h3 style="font-size:15px">免费隐私保护</h3><p class="muted small" style="margin:0">多数后缀支持 WHOIS 隐私保护，避免个人信息公开。</p></div>
+      <div class="card"><h3 style="font-size:15px">完整 DNS 管理</h3><p class="muted small" style="margin:0">支持 NS 修改、解析记录管理与转移锁，随时迁移不受限。</p></div>
+      <div class="card"><h3 style="font-size:15px">到期提醒</h3><p class="muted small" style="margin:0">到期前 14 天自动生成续费账单并发送邮件提醒。</p></div>
+    </div>
+  </div>
+</section>
+{include footer}

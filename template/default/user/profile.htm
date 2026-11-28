@@ -1,0 +1,35 @@
+{include header}
+<div class="container">
+  <div class="uc-layout">
+    {include user/sidebar}
+    <main class="uc-main">
+      <div class="page-head"><h1>个人资料</h1></div>
+      <div class="panel" style="max-width:860px">
+        <form method="post" action="{url('/user/profile')}">
+          {csrf}
+          <div class="form-grid">
+            <div class="form-row"><label>姓名</label><input type="text" name="name" value="{$profile.name}"></div>
+            <div class="form-row"><label>公司</label><input type="text" name="company" value="{$profile.company}"></div>
+            <div class="form-row"><label>邮箱</label><input type="email" value="{$profile.email}" disabled><div class="form-help">如需更换邮箱请联系客服</div></div>
+            <div class="form-row"><label>电话</label><input type="text" name="phone" value="{$profile.phone}"></div>
+            <div class="form-row"><label>国家/地区代码</label><input type="text" name="country" value="{$profile.country}" maxlength="10"></div>
+            <div class="form-row"><label>省/州</label><input type="text" name="province" value="{$profile.province}"></div>
+            <div class="form-row"><label>城市</label><input type="text" name="city" value="{$profile.city}"></div>
+            <div class="form-row"><label>邮编</label><input type="text" name="postcode" value="{$profile.postcode}"></div>
+            <div class="form-row full"><label>地址</label><input type="text" name="address" value="{$profile.address}"></div>
+            <div class="form-row">
+              <label>结算货币</label>
+              <select name="currency">
+                {loop $currencies as $c}
+                <option value="{$c.code}" {if $profile.currency == $c.code}selected{/if}>{$c.code} - {$c.name}</option>
+                {/loop}
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-primary" type="submit">保存资料</button>
+        </form>
+      </div>
+    </main>
+  </div>
+</div>
+{include footer}

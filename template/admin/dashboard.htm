@@ -1,0 +1,114 @@
+{include header}
+<div class="adm-head">
+  <div>
+    <h1>仪表盘</h1>
+    <p>今天是 {date('Y-m-d')}，以下是业务概览。</p>
+  </div>
+  <div class="flex">
+    <a class="btn" href="{admin_url('/invoices')}">查看未付账单</a>
+    <a class="btn btn-primary" href="{admin_url('/invoice/create')}">创建账单</a>
+  </div>
+</div>
+
+<div class="grid-4">
+  <div class="stat"><div class="label">本月收入</div><div class="value">{money($stats.revenue_month)}</div><div class="sub">已入账交易</div></div>
+  <div class="stat"><div class="label">今日订单</div><div class="value">{$stats.orders_today}</div><div class="sub">待处理 {$stats.pending_orders} 个</div></div>
+  <div class="stat"><div class="label">客户总数</div><div class="value">{$stats.clients}</div><div class="sub">在服主机 {$stats.hosts_active}</div></div>
+  <div class="stat"><div class="label">待收金额</div><div class="value">{money($stats.unpaid_total)}</div><div class="sub">待回复工单 {$stats.tickets_open}</div></div>
+</div>
+
+<div class="grid-2 mt-3" style="grid-template-columns:1.6fr 1fr">
+  <div class="card">
+    <div class="card-title"><h3>近 12 个月收入</h3><span class="small muted">单位：元</span></div>
+    <div class="bars">
+      {loop $revenue as $r}
+      <div class="bar-col">
+        <div class="bar" style="height:{$r.percent}%" title="{money($r.amount)}"></div>
+        <div class="bar-label">{mb_substr($r.month, 5, 2)}月</div>
+      </div>
+      {/loop}
+    </div>
+    <div class="legend" style="margin-top:12px"><span>合计 {money(array_sum(array_column($revenue, 'amount')))}</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><h3>服务器负载</h3><a class="small" href="{admin_url('/servers')}">管理</a></div>
+    {loop $servers as $s}
+    <div style="padding:9px 0;border-bottom:1px solid #f2f4f7">
+      <div class="flex-between">
+        <div>
+          <div style="font-weight:550;font-size:13px">{$s.name}</div>
+          <div class="small muted">{$s.module} · {$s.host}</div>
+        </div>
+        <span class="badge {if $s.max_accounts > 0 && $s.load >= $s.max_accounts}danger{else}ok{/if}">{$s.load}{if $s.max_accounts > 0} / {$s.max_accounts}{/if}</span>
+      </div>
+    </div>
+    {/loop}
+    {if !$servers}<p class="small muted" style="margin:0">尚未添加服务器节点。<a href="{admin_url('/server/create')}">添加</a></p>{/if}
+  </div>
+</div>
+
+<div class="grid-2 mt-3">
+  <div class="card">
+    <div class="card-title"><h3>最近订单</h3><a class="small" href="{admin_url('/orders')}">全部</a></div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>订单号</th><th>客户</th><th class="num">金额</th><th>状态</th></tr></thead>
+        <tbody>
+          {loop $recentOrders as $o}
+          <tr>
+            <td><a href="{admin_url('/order/' . $o.id)}">{$o.order_no}</a></td>
+            <td class="small">{$o.user.email}</td>
+            <td class="num">{money($o.total)}</td>
+            <td><span class="badge {status_class($o.status)}">{status_text($o.status)}</span></td>
+          </tr>
+          {/loop}
+          {if !$recentOrders}<tr><td colspan="4" class="empty">暂无订单</td></tr>{/if}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><h3>最近工单</h3><a class="small" href="{admin_url('/tickets')}">全部</a></div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>主题</th><th>客户</th><th>状态</th></tr></thead>
+        <tbody>
+          {loop $recentTickets as $t}
+          <tr>
+            <td><a href="{admin_url('/ticket/' . $t.id)}">{$t.subject}</a></td>
+            <td class="small">{$t.user.email}</td>
+            <td><span class="badge {status_class($t.status)}">{status_text($t.status)}</span></td>
+          </tr>
+          {/loop}
+          {if !$recentTickets}<tr><td colspan="3" class="empty">暂无工单</td></tr>{/if}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="grid-2 mt-3">
+  <div class="card">
+    <div class="card-title"><h3>即将到期域名</h3><a class="small" href="{admin_url('/domains')}">全部</a></div>
+    {loop $expiringDomains as $d}
+    <div class="flex-between" style="padding:8px 0;border-bottom:1px solid #f2f4f7">
+      <a href="{admin_url('/domain/' . $d.id)}" style="font-size:13px">{$d.domain}</a>
+      <span class="small muted">{date('Y-m-d', strtotime($d.expire_date))}</span>
+    </div>
+    {/loop}
+    {if !$expiringDomains}<p class="small muted" style="margin:0">30 天内无到期域名。</p>{/if}
+  </div>
+  <div class="card">
+    <div class="card-title"><h3>即将到期服务</h3><a class="small" href="{admin_url('/hosts')}">全部</a></div>
+    {loop $expiringHosts as $h}
+    <div class="flex-between" style="padding:8px 0;border-bottom:1px solid #f2f4f7">
+      <a href="{admin_url('/host/' . $h.id)}" style="font-size:13px">{$h.domain}</a>
+      <span class="small muted">{date('Y-m-d', strtotime($h.next_due))}</span>
+    </div>
+    {/loop}
+    {if !$expiringHosts}<p class="small muted" style="margin:0">14 天内无到期服务。</p>{/if}
+  </div>
+</div>
+{include footer}

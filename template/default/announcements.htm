@@ -1,0 +1,18 @@
+{include header}
+<section class="section">
+  <div class="container" style="max-width:900px">
+    <div class="page-head"><h1>服务公告</h1><span class="small muted">共 {$list.total} 条</span></div>
+    {loop $list.data as $a}
+    <a class="card" href="{url('/announcement/' . $a.id)}" style="display:block;color:inherit;margin-bottom:14px">
+      <div class="flex-between">
+        <h3 style="font-size:17px;margin:0">{$a.title}</h3>
+        <span class="small muted">{date('Y-m-d', strtotime($a.created_at))}</span>
+      </div>
+      <p class="muted small" style="margin:8px 0 0">{mb_substr(strip_tags($a.content), 0, 140)}…</p>
+    </a>
+    {/loop}
+    {if !$list.data}<div class="card"><p class="muted" style="margin:0">暂无公告。</p></div>{/if}
+    {paginate_links($list, url('/announcements'))}
+  </div>
+</section>
+{include footer}

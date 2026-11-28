@@ -1,0 +1,53 @@
+{include header}
+<section class="section" style="padding-bottom:20px">
+  <div class="container" style="max-width:760px">
+    <div class="small muted" style="margin-bottom:10px"><a href="{url('/invoice/' . $invoice.id)}">账单 {$invoice.invoice_no}</a> / 支付</div>
+    <div class="card">
+      <div class="flex-between">
+        <div>
+          <h1 style="font-size:24px;margin-bottom:4px">支付账单</h1>
+          <p class="muted" style="margin:0">订单号 {$invoice.invoice_no}</p>
+        </div>
+        <div style="text-align:right">
+          <div class="small muted">应付金额</div>
+          <div style="font-size:26px;font-weight:750;color:var(--ink)">{money($due)}</div>
+        </div>
+      </div>
+      <div class="alert info mt-2" style="margin-bottom:18px">支付完成后请等待页面跳转。若已扣款但账单未更新，请勿重复支付，联系客服并提供交易号。</div>
+
+      <h3 style="font-size:15px;margin-bottom:10px">在线支付</h3>
+      <div class="grid grid-2" style="gap:12px">
+        {loop $gateways as $name => $gw}
+        <form method="post" action="{url('/invoice/' . $invoice.id . '/pay/' . $name)}">
+          {csrf}
+          <button class="card" type="submit" style="width:100%;text-align:left;cursor:pointer;padding:16px">
+            <div style="font-weight:650;color:var(--ink)">{$gw.title}</div>
+            <div class="small muted" style="margin-top:2px">{$gw.description}</div>
+          </button>
+        </form>
+        {/loop}
+        {if !$gateways}
+        <div class="card" style="grid-column:1/-1"><p class="muted" style="margin:0">{if str_starts_with($invoice.note, '[TOPUP]')}管理员尚未启用在线支付网关，请联系客服完成充值。{else}管理员尚未启用在线支付网关，请使用余额支付或联系客服。{/if}</p></div>
+        {/if}
+      </div>
+
+      {if !str_starts_with($invoice.note, '[TOPUP]')}
+      <h3 style="font-size:15px;margin:22px 0 10px">余额支付</h3>
+      <div class="card card-flat" style="padding:16px;background:#f9fafb">
+        <div class="flex-between">
+          <div>
+            <div style="font-weight:600">账户余额 {money($user.balance)}</div>
+            <div class="small muted">{if $user.balance >= $due}余额充足，可直接支付{else}余额不足，请先充值或选择在线支付{/if}</div>
+          </div>
+          <form method="post" action="{url('/invoice/' . $invoice.id . '/balance')}">
+            {csrf}
+            <button class="btn btn-primary" type="submit" {if $user.balance < $due}disabled{/if}>余额支付</button>
+          </form>
+        </div>
+      </div>
+      {/if}
+      <div class="mt-3"><a class="small" href="{url('/invoice/' . $invoice.id)}">返回账单详情</a></div>
+    </div>
+  </div>
+</section>
+{include footer}

@@ -1,0 +1,76 @@
+{include header}
+<div class="adm-head">
+  <div>
+    <h1>#{$ticket.id} {$ticket.subject}</h1>
+    <p>客户 <a href="{admin_url('/client/' . $user.id)}">{$user.email}</a> · {if $dept}{$dept.name}{/if} · {$ticket.created_at}</p>
+  </div>
+  <a class="btn" href="{admin_url('/tickets')}">返回列表</a>
+</div>
+<div class="grid-2" style="grid-template-columns:1.6fr 1fr">
+  <div class="card">
+    <div class="card-title"><h3>对话记录</h3><span class="badge {status_class($ticket.status)}">{status_text($ticket.status)}</span></div>
+    {loop $replies as $r}
+    <div style="display:flex;gap:10px;padding:12px 0;border-bottom:1px solid #f2f4f7">
+      <div class="avatar" style="{if $r.admin_id}background:#e8f0ff;color:#1d4ed8;{/if}">{if $r.admin_id}A{else}C{/if}</div>
+      <div style="flex:1;min-width:0">
+        <div class="between">
+          <strong style="font-size:13px">
+            {if $r.admin_id}{if $r.admin}{$r.admin.name ?: $r.admin.username}{else}管理员{/if}{else}{$user.name}{/if}
+          </strong>
+          <span class="small muted">{$r.created_at}</span>
+        </div>
+        <div style="margin-top:4px;font-size:13.5px;line-height:1.75">{:nl2br(e($r.message))}</div>
+      </div>
+    </div>
+    {/loop}
+  </div>
+
+  <div>
+    <div class="card">
+      <div class="card-title"><h3>回复客户</h3></div>
+      <form method="post" action="{admin_url('/ticket/' . $ticket.id . '/reply')}">
+        {csrf}
+        <div class="form-row">
+          <textarea id="replyBox" name="message" rows="6" required placeholder="输入回复内容"></textarea>
+          <div class="form-help">快捷插入预设回复：</div>
+          <div class="flex" style="flex-wrap:wrap;gap:6px;margin-top:6px">
+            {loop $canned as $c}
+            <button class="btn btn-sm" type="button" data-fill="#replyBox" data-text="{$c.message}">{$c.title}</button>
+            {/loop}
+          </div>
+        </div>
+        <div class="form-row"><label>回复后状态</label>
+          <select name="status">
+            <option value="answered">已回复</option>
+            <option value="open">保持待处理</option>
+            <option value="closed">关闭工单</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" type="submit">发送回复</button>
+      </form>
+    </div>
+    <div class="card mt-2">
+      <div class="card-title"><h3>工单设置</h3></div>
+      <form method="post" action="{admin_url('/ticket/' . $ticket.id . '/status')}">
+        {csrf}
+        <div class="form-row"><label>状态</label>
+          <select name="status">
+            <option value="open" {if $ticket.status == 'open'}selected{/if}>待回复</option>
+            <option value="answered" {if $ticket.status == 'answered'}selected{/if}>已回复</option>
+            <option value="customer_reply" {if $ticket.status == 'customer_reply'}selected{/if}>客户回复</option>
+            <option value="closed" {if $ticket.status == 'closed'}selected{/if}>关闭</option>
+          </select>
+        </div>
+        <div class="form-row"><label>部门</label>
+          <select name="dept_id">
+            {loop $depts as $d}
+            <option value="{$d.id}" {if $ticket.dept_id == $d.id}selected{/if}>{$d.name}</option>
+            {/loop}
+          </select>
+        </div>
+        <button class="btn btn-sm" type="submit">更新工单</button>
+      </form>
+    </div>
+  </div>
+</div>
+{include footer}

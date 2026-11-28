@@ -1,0 +1,70 @@
+{include header}
+<div class="adm-head">
+  <div><h1>模板管理</h1><p>前台与后台模板均为 .htm，保存后自动清除编译缓存。</p></div>
+</div>
+
+<div class="card" style="margin-bottom:18px">
+  <div class="between" style="flex-wrap:wrap">
+    <div class="flex">
+      <span class="small muted">主题：</span>
+      {loop $themes as $t}
+      <a class="btn btn-sm {if $t == $theme}btn-primary{/if}" href="{admin_url('/templates', ['theme' => $t])}">{$t}</a>
+      {/loop}
+    </div>
+    <div class="flex">
+      {if $theme != cfg('theme')}
+      <form method="post" action="{admin_url('/template/switch')}">
+        {csrf}<input type="hidden" name="theme" value="{$theme}">
+        <button class="btn btn-sm btn-primary" type="submit">启用该主题</button>
+      </form>
+      {else}
+      <span class="badge ok">当前启用</span>
+      {/if}
+    </div>
+  </div>
+</div>
+
+<div class="grid-2" style="grid-template-columns:1.6fr 1fr;align-items:start">
+  <div class="card" style="padding:0;overflow:hidden">
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>文件</th><th>大小</th><th>修改时间</th><th class="actions">操作</th></tr></thead>
+        <tbody>
+          {loop $files as $f}
+          <tr>
+            <td class="mono">{$f.name}</td>
+            <td class="small muted">{format_bytes($f.size)}</td>
+            <td class="small muted">{$f.mtime}</td>
+            <td class="actions">
+              <a href="{admin_url('/template/edit', ['theme' => $theme, 'file' => $f.name])}">编辑</a>
+              <form method="post" action="{admin_url('/template/delete')}" style="display:inline" data-confirm="删除前会自动备份，确定继续？">
+                {csrf}<input type="hidden" name="theme" value="{$theme}">
+                <input type="hidden" name="file" value="{$f.name}">
+                <button class="btn btn-sm btn-danger" type="submit" style="margin-left:8px">删除</button>
+              </form>
+            </td>
+          </tr>
+          {/loop}
+          {if !$files}<tr><td colspan="4" class="empty">该主题暂无模板文件</td></tr>{/if}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><h3>新建模板文件</h3></div>
+    <form method="post" action="{admin_url('/template/create')}">
+      {csrf}
+      <input type="hidden" name="theme" value="{$theme}">
+      <div class="form-row"><label>文件名</label><input type="text" name="file" placeholder="user/example.htm" required>
+        <div class="form-help">只允许 .htm，可包含子目录，例如 user/orders.htm。</div>
+      </div>
+      <div class="form-row"><label>初始内容</label><textarea class="code-input" name="content" rows="5">&lt;!-- {include header} --&gt;</textarea></div>
+      <button class="btn btn-primary btn-sm" type="submit">创建文件</button>
+    </form>
+    <div class="alert info mt-3" style="margin-bottom:0">
+      模板语法：<code>&#123;$var&#125;</code>、<code>&#123;if&#125;</code>、<code>&#123;loop&#125;</code>、<code>&#123;include header&#125;</code>。变量默认转义，输出 HTML 请用 <code>&#123;:$html&#125;</code>。
+    </div>
+  </div>
+</div>
+{include footer}

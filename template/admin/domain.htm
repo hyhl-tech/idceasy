@@ -1,0 +1,115 @@
+{include header}
+<div class="adm-head">
+  <div>
+    <h1>{$domain.domain} <span class="badge {status_class($domain.status)}" style="vertical-align:middle">{status_text($domain.status)}</span></h1>
+    <p>客户 <a href="{admin_url('/client/' . $user.id)}">{$user.email}</a> · {$domain.registrar} · 到期 {$domain.expire_date}</p>
+  </div>
+  <div class="flex"><a class="btn" href="{admin_url('/domains')}">返回列表</a></div>
+</div>
+
+<div class="grid-2" style="grid-template-columns:1.4fr 1fr">
+  <div>
+    <div class="card">
+      <div class="card-title"><h3>域名信息</h3></div>
+      <div class="kv small" style="display:grid;grid-template-columns:110px 1fr;gap:8px 12px">
+        <span class="muted">域名</span><span>{$domain.domain}</span>
+        <span class="muted">注册商</span><span>{$domain.registrar}（{$domain.registrar_domain_id}）</span>
+        <span class="muted">状态</span><span>{status_text($domain.status)}</span>
+        <span class="muted">注册时间</span><span>{$domain.reg_date}</span>
+        <span class="muted">到期时间</span><span>{$domain.expire_date}</span>
+        <span class="muted">续费价</span><span>{if $tld}{money($tld.renew_price)}{else}-{/if}</span>
+        <span class="muted">转移锁</span><span>{if $domain.lock}开启{else}关闭{/if}</span>
+        <span class="muted">隐私保护</span><span>{if $domain.privacy}开启{else}关闭{/if}</span>
+        <span class="muted">自动续费</span><span>{if $domain.auto_renew}开启{else}关闭{/if}</span>
+        <span class="muted">EPP</span><span>{if $domain.auth_code}<code>{$domain.auth_code}</code>{else}-{/if}</span>
+        <span class="muted">NS</span><span>{loop $ns as $n}{$n}<br>{/loop}{if !$ns}-{/if}</span>
+      </div>
+    </div>
+
+    <div class="card mt-2">
+      <div class="card-title"><h3>操作</h3></div>
+      <div class="grid-2">
+        <form method="post" action="{admin_url('/domain/' . $domain.id . '/action')}">
+          {csrf}<input type="hidden" name="action" value="sync">
+          <button class="btn btn-sm btn-block" type="submit">同步注册商状态</button>
+        </form>
+        <form method="post" action="{admin_url('/domain/' . $domain.id . '/action')}">
+          {csrf}<input type="hidden" name="action" value="register">
+          <button class="btn btn-sm btn-block" type="submit">重新提交注册</button>
+        </form>
+        <form method="post" action="{admin_url('/domain/' . $domain.id . '/action')}">
+          {csrf}<input type="hidden" name="action" value="epp">
+          <button class="btn btn-sm btn-block" type="submit">获取 EPP</button>
+        </form>
+        <form method="post" action="{admin_url('/domain/' . $domain.id . '/action')}">
+          {csrf}<input type="hidden" name="action" value="autorenew">
+          <input type="hidden" name="enable" value="{if $domain.auto_renew}0{else}1{/if}">
+          <button class="btn btn-sm btn-block" type="submit">{if $domain.auto_renew}关闭{else}开启{/if}自动续费</button>
+        </form>
+      </div>
+
+      <div class="grid-2 mt-2">
+        <form method="post" action="{admin_url('/domain/' . $domain.id . '/action')}" data-confirm="确定续费 1 年？将调用注册商接口并产生费用。">
+          {csrf}<input type="hidden" name="action" value="renew"><input type="hidden" name="years" value="1">
+          <button class="btn btn-sm btn-block" type="submit">续费 1 年</button>
+        </form>
+        <form method="post" action="{admin_url('/domain/' . $domain.id . '/action')}">
+          {csrf}<input type="hidden" name="action" value="lock">
+          <input type="hidden" name="enable" value="{if $domain.lock}0{else}1{/if}">
+          <button class="btn btn-sm btn-block" type="submit">{if $domain.lock}关闭{else}开启{/if}转移锁</button>
+        </form>
+      </div>
+
+      <form method="post" action="{admin_url('/domain/' . $domain.id . '/action')}" class="mt-2">
+        {csrf}<input type="hidden" name="action" value="ns">
+        <label>修改 NS（每行一个）</label>
+        <textarea name="ns[]" rows="2" class="code-input">{loop $ns as $n}{$n}
+{/loop}</textarea>
+        <div class="flex" style="margin-top:6px">
+          <input type="text" name="ns[]" placeholder="ns1.example.com">
+          <input type="text" name="ns[]" placeholder="ns2.example.com">
+          <button class="btn btn-sm" type="submit">保存 NS</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <div class="card-title"><h3>到期与状态</h3></div>
+      <form method="post" action="{admin_url('/domain/' . $domain.id . '/action')}">
+        {csrf}<input type="hidden" name="action" value="update">
+        <div class="form-row"><label>到期时间</label><input type="text" name="expire_date" value="{$domain.expire_date}"></div>
+        <div class="form-row"><label>状态</label>
+          <select name="status">
+            <option value="active" {if $domain.status == 'active'}selected{/if}>正常</option>
+            <option value="pending" {if $domain.status == 'pending'}selected{/if}>待注册</option>
+            <option value="expired" {if $domain.status == 'expired'}selected{/if}>已过期</option>
+            <option value="pending_transfer" {if $domain.status == 'pending_transfer'}selected{/if}>转入中</option>
+            <option value="transferred" {if $domain.status == 'transferred'}selected{/if}>已转出</option>
+          </select>
+        </div>
+        <label class="check"><input type="checkbox" name="auto_renew" value="1" {if $domain.auto_renew}checked{/if}> 自动续费</label>
+        <button class="btn btn-primary btn-sm mt-2" type="submit">保存</button>
+      </form>
+    </div>
+    <div class="card mt-2">
+      <div class="card-title"><h3>相关订单</h3></div>
+      {loop $orders as $o}
+      <div class="flex-between" style="padding:7px 0;border-bottom:1px solid #f2f4f7">
+        <span class="small">{$o.type} · {money($o.amount)}</span>
+        <span class="small muted">{$o.cycle}</span>
+      </div>
+      {/loop}
+      {if !$orders}<p class="small muted" style="margin:0">无关联订单。</p>{/if}
+    </div>
+    <div class="card mt-2">
+      <div class="card-title"><h3>危险操作</h3></div>
+      <form method="post" action="{admin_url('/domain/' . $domain.id . '/action')}" data-confirm="确定删除本地域名记录？">
+        {csrf}<input type="hidden" name="action" value="delete">
+        <button class="btn btn-danger btn-sm" type="submit">删除记录</button>
+      </form>
+    </div>
+  </div>
+</div>
+{include footer}

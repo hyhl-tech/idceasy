@@ -1,0 +1,190 @@
+{include header}
+<div class="adm-head">
+  <div>
+    <h1>{$client.name} <span class="badge {if $client.status}ok{else}danger{/if}" style="vertical-align:middle">{if $client.status}正常{else}禁用{/if}</span></h1>
+    <p>{$client.email} · 注册于 {$client.created_at}</p>
+  </div>
+  <div class="flex">
+    <form method="post" action="{admin_url('/client/' . $client.id . '/login')}">
+      {csrf}<button class="btn" type="submit">代登录</button>
+    </form>
+    <a class="btn btn-primary" href="{admin_url('/invoice/create')}">创建账单</a>
+  </div>
+</div>
+
+<div class="tabs">
+  <a href="#" data-tab="overview" class="active">概览</a>
+  <a href="#" data-tab="services">服务 ({count($hosts)})</a>
+  <a href="#" data-tab="domains">域名 ({count($domains)})</a>
+  <a href="#" data-tab="billing">账单与订单</a>
+  <a href="#" data-tab="tickets">工单</a>
+  <a href="#" data-tab="edit">编辑资料</a>
+</div>
+
+<div data-tab-pane="overview">
+  <div class="grid-2" style="grid-template-columns:1.4fr 1fr">
+    <div class="card">
+      <div class="card-title"><h3>账户信息</h3></div>
+      <div class="kv small" style="grid-template-columns:110px 1fr;display:grid;gap:8px 12px">
+        <span class="muted">客户 ID</span><span>{$client.id}</span>
+        <span class="muted">邮箱</span><span>{$client.email}</span>
+        <span class="muted">姓名</span><span>{$client.name}</span>
+        <span class="muted">公司</span><span>{$client.company}</span>
+        <span class="muted">电话</span><span>{$client.phone}</span>
+        <span class="muted">地址</span><span>{$client.address} {$client.city} {$client.province} {$client.postcode} {$client.country}</span>
+        <span class="muted">余额</span><span><strong>{money($client.balance)}</strong></span>
+        <span class="muted">信用额度</span><span>{money($client.credit_limit)}</span>
+        <span class="muted">货币</span><span>{$client.currency}</span>
+        <span class="muted">最后登录</span><span>{$client.last_login_at} · {$client.last_login_ip}</span>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="card-title"><h3>调整余额</h3></div>
+        <form method="post" action="{admin_url('/client/' . $client.id . '/balance')}">
+          {csrf}
+          <div class="form-row"><label>金额（负数为扣减）</label><input type="number" step="0.01" name="amount" required placeholder="100.00"></div>
+          <div class="form-row"><label>备注</label><input type="text" name="remark" value="管理员调整"></div>
+          <button class="btn btn-primary btn-sm" type="submit">提交</button>
+        </form>
+      </div>
+      <div class="card mt-2">
+        <div class="card-title"><h3>发送邮件</h3></div>
+        <form method="post" action="{admin_url('/client/' . $client.id . '/mail')}">
+          {csrf}
+          <div class="form-row"><input type="text" name="subject" placeholder="邮件主题" required></div>
+          <div class="form-row"><textarea name="message" rows="3" placeholder="邮件内容" required></textarea></div>
+          <button class="btn btn-sm" type="submit">发送</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-tab-pane="services" style="display:none">
+  <div class="card" style="padding:0;overflow:hidden">
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>ID</th><th>域名</th><th>产品</th><th>状态</th><th>到期</th><th class="actions">操作</th></tr></thead>
+      <tbody>
+        {loop $hosts as $h}
+        <tr>
+          <td>{$h.id}</td><td>{$h.domain}</td><td class="small">{$h.product.name}</td>
+          <td><span class="badge {status_class($h.status)}">{status_text($h.status)}</span></td>
+          <td class="small muted">{$h.next_due}</td>
+          <td class="actions"><a href="{admin_url('/host/' . $h.id)}">管理</a></td>
+        </tr>
+        {/loop}
+        {if !$hosts}<tr><td colspan="6" class="empty">暂无服务</td></tr>{/if}
+      </tbody>
+    </table></div>
+  </div>
+</div>
+
+<div data-tab-pane="domains" style="display:none">
+  <div class="card" style="padding:0;overflow:hidden">
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>域名</th><th>注册商</th><th>状态</th><th>到期</th><th class="actions">操作</th></tr></thead>
+      <tbody>
+        {loop $domains as $d}
+        <tr>
+          <td>{$d.domain}</td><td class="small">{$d.registrar}</td>
+          <td><span class="badge {status_class($d.status)}">{status_text($d.status)}</span></td>
+          <td class="small muted">{$d.expire_date}</td>
+          <td class="actions"><a href="{admin_url('/domain/' . $d.id)}">管理</a></td>
+        </tr>
+        {/loop}
+        {if !$domains}<tr><td colspan="5" class="empty">暂无域名</td></tr>{/if}
+      </tbody>
+    </table></div>
+  </div>
+</div>
+
+<div data-tab-pane="billing" style="display:none">
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title"><h3>最近账单</h3></div>
+      <div class="table-wrap"><table class="table">
+        <thead><tr><th>账单号</th><th class="num">金额</th><th>状态</th></tr></thead>
+        <tbody>
+          {loop $invoices as $i}
+          <tr><td><a href="{admin_url('/invoice/' . $i.id)}">{$i.invoice_no}</a></td><td class="num">{money($i.total)}</td>
+          <td><span class="badge {status_class($i.status)}">{status_text($i.status)}</span></td></tr>
+          {/loop}
+          {if !$invoices}<tr><td colspan="3" class="empty">暂无账单</td></tr>{/if}
+        </tbody>
+      </table></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><h3>最近订单</h3></div>
+      <div class="table-wrap"><table class="table">
+        <thead><tr><th>订单号</th><th class="num">金额</th><th>状态</th></tr></thead>
+        <tbody>
+          {loop $orders as $o}
+          <tr><td><a href="{admin_url('/order/' . $o.id)}">{$o.order_no}</a></td><td class="num">{money($o.total)}</td>
+          <td><span class="badge {status_class($o.status)}">{status_text($o.status)}</span></td></tr>
+          {/loop}
+          {if !$orders}<tr><td colspan="3" class="empty">暂无订单</td></tr>{/if}
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+  <div class="card mt-2">
+    <div class="card-title"><h3>资金流水</h3></div>
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>时间</th><th>网关</th><th>交易号</th><th>备注</th><th class="num">金额</th></tr></thead>
+      <tbody>
+        {loop $transactions as $t}
+        <tr><td class="small">{$t.created_at}</td><td>{$t.gateway}</td><td class="small muted">{$t.trade_no}</td>
+        <td class="small muted">{$t.remark}</td><td class="num">{money($t.amount)}</td></tr>
+        {/loop}
+        {if !$transactions}<tr><td colspan="5" class="empty">暂无流水</td></tr>{/if}
+      </tbody>
+    </table></div>
+  </div>
+</div>
+
+<div data-tab-pane="tickets" style="display:none">
+  <div class="card" style="padding:0;overflow:hidden">
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>#</th><th>主题</th><th>状态</th><th>最后回复</th><th class="actions">操作</th></tr></thead>
+      <tbody>
+        {loop $tickets as $t}
+        <tr><td>{$t.id}</td><td>{$t.subject}</td>
+        <td><span class="badge {status_class($t.status)}">{status_text($t.status)}</span></td>
+        <td class="small muted">{$t.last_reply_at}</td>
+        <td class="actions"><a href="{admin_url('/ticket/' . $t.id)}">处理</a></td></tr>
+        {/loop}
+        {if !$tickets}<tr><td colspan="5" class="empty">暂无工单</td></tr>{/if}
+      </tbody>
+    </table></div>
+  </div>
+</div>
+
+<div data-tab-pane="edit" style="display:none">
+  <div class="card" style="max-width:900px">
+    <form method="post" action="{admin_url('/client/' . $client.id . '/update')}">
+      {csrf}
+      <div class="form-grid">
+        <div class="form-row"><label>姓名</label><input type="text" name="name" value="{$client.name}"></div>
+        <div class="form-row"><label>公司</label><input type="text" name="company" value="{$client.company}"></div>
+        <div class="form-row"><label>电话</label><input type="text" name="phone" value="{$client.phone}"></div>
+        <div class="form-row"><label>国家代码</label><input type="text" name="country" value="{$client.country}"></div>
+        <div class="form-row"><label>省/州</label><input type="text" name="province" value="{$client.province}"></div>
+        <div class="form-row"><label>城市</label><input type="text" name="city" value="{$client.city}"></div>
+        <div class="form-row"><label>邮编</label><input type="text" name="postcode" value="{$client.postcode}"></div>
+        <div class="form-row"><label>货币</label><input type="text" name="currency" value="{$client.currency}"></div>
+        <div class="form-row full"><label>地址</label><input type="text" name="address" value="{$client.address}"></div>
+        <div class="form-row"><label>信用额度</label><input type="number" step="0.01" name="credit_limit" value="{$client.credit_limit}"></div>
+        <div class="form-row"><label>重置密码</label><input type="password" name="password" placeholder="留空不修改" minlength="8"></div>
+        <div class="form-row"><label>状态</label>
+          <select name="status"><option value="1" {if $client.status}selected{/if}>正常</option><option value="0" {if !$client.status}selected{/if}>禁用</option></select>
+        </div>
+        <div class="form-row"><label>邮箱验证</label>
+          <select name="email_verified"><option value="1" {if $client.email_verified}selected{/if}>已验证</option><option value="0" {if !$client.email_verified}selected{/if}>未验证</option></select>
+        </div>
+      </div>
+      <div class="form-actions"><button class="btn btn-primary" type="submit">保存资料</button></div>
+    </form>
+  </div>
+</div>
+{include footer}

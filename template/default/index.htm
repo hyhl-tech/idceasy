@@ -1,0 +1,126 @@
+{include header}
+<section class="hero">
+  <div class="container hero-inner">
+    <div>
+      <span class="eyebrow">IDC Billing · Domain · Cloud</span>
+      <h1>把主机、域名与账单<br>放进一个系统</h1>
+      <p class="lead">idceasy 是一套可自托管的 IDC 计费与云服务系统。原生对接 20+ 域名注册商、主流支付网关与服务器面板，开源、可扩展、数据完全归你所有。</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary btn-lg" href="{url('/products')}">浏览产品</a>
+        <a class="btn btn-ghost btn-lg" href="{url('/domain')}">查询域名</a>
+      </div>
+      <div class="hero-points">
+        <span>一键安装</span>
+        <span>原生 SMTP</span>
+        <span>插件化架构</span>
+        <span>AGPL-3.0 开源</span>
+      </div>
+    </div>
+    <div class="hero-card">
+      <div class="hero-card-head">
+        <div class="flex"><span class="dot"></span><strong style="font-size:13px">系统状态</strong></div>
+        <span class="badge ok">运行正常</span>
+      </div>
+      <div class="console">
+<span class="c-dim">$</span> idceasy --status<br>
+<span class="c-green">✓</span> billing engine <span class="c-dim">ready</span><br>
+<span class="c-green">✓</span> domain registrars <span class="c-dim">24 connected</span><br>
+<span class="c-green">✓</span> payment gateways <span class="c-dim">loaded</span><br>
+<span class="c-green">✓</span> smtp transport <span class="c-dim">native</span><br>
+<span class="c-blue">→</span> listening on <span class="c-dim">idceasy.site</span>
+      </div>
+      <div class="hero-stat-row">
+        <div class="hero-stat"><strong>{$stats.clients}</strong><span>注册客户</span></div>
+        <div class="hero-stat"><strong>{$stats.hosts}</strong><span>在服主机</span></div>
+        <div class="hero-stat"><strong>{$stats.domains}</strong><span>托管域名</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <h2>产品与服务</h2>
+        <p>从虚拟主机到独立服务器，从域名到 SSL，一个账户全部搞定。</p>
+      </div>
+      <a class="btn btn-ghost" href="{url('/products')}">查看全部</a>
+    </div>
+    <div class="grid grid-3">
+      {loop $products as $p}
+      <article class="product-card">
+        <div class="flex-between">
+          <h3>{$p.name}</h3>
+          <span class="badge blue">{if $p.type == 'host'}虚拟主机{elseif $p.type == 'vps'}云服务器{elseif $p.type == 'dedicated'}独立服务器{elseif $p.type == 'ssl'}SSL{elseif $p.type == 'domain'}域名{else}服务{/if}</span>
+        </div>
+        <p class="desc">{strip_tags($p.description)}</p>
+        <div class="price-line">
+          <span class="amount">{money($p.price_from)}</span>
+          <span class="unit">/ {cycle_text($p.price_cycle)} 起</span>
+        </div>
+        <a class="btn btn-primary btn-block" href="{url('/product/' . $p.slug)}">查看详情</a>
+      </article>
+      {/loop}
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0">
+  <div class="container">
+    <div class="grid grid-4">
+      <div class="card">
+        <h3>实时开通</h3>
+        <p class="muted small" style="margin:0">付款后自动调用服务器模块创建主机，支持 cPanel、DirectAdmin、Plesk、Virtualizor、SolusVM 等。</p>
+      </div>
+      <div class="card">
+        <h3>域名全生命周期</h3>
+        <p class="muted small" style="margin:0">查询、注册、转入、续费、NS 修改、转移锁、隐私保护与状态同步，全部在会员中心完成。</p>
+      </div>
+      <div class="card">
+        <h3>财务自动化</h3>
+        <p class="muted small" style="margin:0">账单、续费提醒、余额、优惠码、退款、税费与联盟佣金，配合定时任务自动运转。</p>
+      </div>
+      <div class="card">
+        <h3>可改可扩展</h3>
+        <p class="muted small" style="margin:0">前台全部为 .htm 模板，后台可在线编辑；插件规范覆盖注册商、支付、服务器与钩子。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0">
+  <div class="container">
+    <div class="card" style="padding:36px;background:linear-gradient(135deg,#0f172a,#1e3a8a);border:0">
+      <div class="grid grid-2" style="align-items:center">
+        <div>
+          <h2 style="color:#fff;margin-bottom:8px">找到属于你的域名</h2>
+          <p style="color:#bfdbfe;margin-bottom:0">支持 .com / .cn / .net / .io 等 20+ 后缀，实时查询注册商库存。</p>
+        </div>
+        <form class="search-bar" method="get" action="{url('/domain')}">
+          <input type="text" name="keyword" placeholder="输入域名，例如 idceasy" autocomplete="off">
+          <button class="btn btn-primary" type="submit">立即查询</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0">
+  <div class="container">
+    <div class="section-head">
+      <div><h2>最新公告</h2><p>产品更新、机房维护与活动信息。</p></div>
+      <a class="btn btn-ghost" href="{url('/announcements')}">全部公告</a>
+    </div>
+    <div class="grid grid-3">
+      {loop $announcements as $a}
+      <a class="card" href="{url('/announcement/' . $a.id)}" style="color:inherit">
+        <div class="small muted" style="margin-bottom:6px">{date('Y-m-d', strtotime($a.created_at))}</div>
+        <h3 style="font-size:16px;margin-bottom:8px">{$a.title}</h3>
+        <p class="muted small" style="margin:0">{mb_substr(strip_tags($a.content), 0, 80)}…</p>
+      </a>
+      {/loop}
+    </div>
+  </div>
+</section>
+{include footer}

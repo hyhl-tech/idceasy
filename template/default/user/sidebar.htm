@@ -1,0 +1,39 @@
+<aside class="uc-side">
+  <div class="uc-user">
+    <div class="avatar">{first_char($user.name)}</div>
+    <div style="min-width:0">
+      <div style="font-weight:600;color:var(--ink);font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{$user.name}</div>
+      <div class="small muted" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{$user.email}</div>
+    </div>
+  </div>
+  <nav class="uc-nav">
+    <div class="group">概览</div>
+    <a href="{url('/user')}">控制台</a>
+    <a href="{url('/user/services')}">我的服务</a>
+    <a href="{url('/user/domains')}">我的域名</a>
+    <a href="{url('/invoice')}">账单中心</a>
+    <a href="{url('/user/topup')}">余额充值</a>
+    <a href="{url('/order')}">我的订单</a>
+    <div class="group">支持</div>
+    <a href="{url('/user/tickets')}">工单支持</a>
+    <a href="{url('/kb')}">帮助中心</a>
+    <div class="group">账户</div>
+    <a href="{url('/user/profile')}">个人资料</a>
+    <a href="{url('/user/addresses')}">地址簿</a>
+    <a href="{url('/user/security')}">安全设置</a>
+    <a href="{url('/user/affiliate')}">推广联盟</a>
+    <a href="{url('/user/transactions')}">资金记录</a>
+  </nav>
+  <script>
+  (function(){
+    var p = location.pathname.replace(/\/$/, '');
+    document.querySelectorAll('.uc-nav a').forEach(function(a){
+      var h = a.getAttribute('href');
+      if (!h) return;
+      if ((h === '/user' || h.endsWith('/user')) ? (p === '/user' || p.endsWith('/user')) : p.indexOf(h) === 0) {
+        a.classList.add('active');
+      }
+    });
+  })();
+  </script>
+</aside>

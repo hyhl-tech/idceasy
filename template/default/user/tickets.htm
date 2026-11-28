@@ -1,0 +1,33 @@
+{include header}
+<div class="container">
+  <div class="uc-layout">
+    {include user/sidebar}
+    <main class="uc-main">
+      <div class="page-head">
+        <div><h1>工单支持</h1><p class="small muted" style="margin:2px 0 0">共 {$list.total} 个工单</p></div>
+        <a class="btn btn-primary btn-sm" href="{url('/user/ticket/new')}">提交工单</a>
+      </div>
+      <div class="panel" style="padding:0;overflow:hidden">
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>#</th><th>主题</th><th>部门</th><th>状态</th><th>最后回复</th></tr></thead>
+            <tbody>
+              {loop $list.data as $t}
+              <tr>
+                <td>{$t.id}</td>
+                <td><a href="{url('/user/ticket/' . $t.id)}">{$t.subject}</a></td>
+                <td>{if $t.dept}{$t.dept.name}{else}-{/if}</td>
+                <td><span class="badge {status_class($t.status)}">{status_text($t.status)}</span></td>
+                <td class="small muted">{$t.last_reply_at}</td>
+              </tr>
+              {/loop}
+              {if !$list.data}<tr><td colspan="5" class="center muted" style="padding:36px">暂无工单</td></tr>{/if}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {paginate_links($list, url('/user/tickets'))}
+    </main>
+  </div>
+</div>
+{include footer}

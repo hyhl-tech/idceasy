@@ -1,0 +1,27 @@
+{include header}
+<div class="container">
+  <div class="uc-layout">
+    {include user/sidebar}
+    <main class="uc-main">
+      <div class="small muted" style="margin-bottom:8px"><a href="{url('/user/tickets')}">工单支持</a> / 新建工单</div>
+      <div class="page-head"><h1>提交工单</h1></div>
+      <div class="panel" style="max-width:760px">
+        <form method="post" action="{url('/user/ticket/new')}">
+          {csrf}
+          <div class="form-row">
+            <label>部门</label>
+            <select name="dept_id" required>
+              {loop $depts as $d}
+              <option value="{$d.id}">{$d.name}（{$d.description}）</option>
+              {/loop}
+            </select>
+          </div>
+          <div class="form-row"><label>主题</label><input type="text" name="subject" required maxlength="200" placeholder="简要描述问题"></div>
+          <div class="form-row"><label>详细内容</label><textarea name="message" rows="8" required placeholder="请提供服务域名、订单号、报错截图或复现步骤，便于快速定位。"></textarea></div>
+          <button class="btn btn-primary" type="submit">提交工单</button>
+        </form>
+      </div>
+    </main>
+  </div>
+</div>
+{include footer}

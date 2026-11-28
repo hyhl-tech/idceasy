@@ -1,0 +1,19 @@
+    </div>
+  </div>
+</div>
+<script src="{asset('js/admin.js')}"></script>
+<script>
+(function () {
+  var p = location.pathname.replace(/\/$/, '');
+  var best = null, bestLen = 0;
+  document.querySelectorAll('.side-nav a').forEach(function (a) {
+    var h = (a.getAttribute('href') || '').replace(/\/$/, '');
+    if (h && p.indexOf(h) === 0 && h.length > bestLen) { best = a; bestLen = h.length; }
+  });
+  if (best) best.classList.add('active');
+  var btn = document.getElementById('sidebarBtn');
+  if (btn) btn.style.display = window.innerWidth <= 900 ? 'inline-flex' : 'none';
+})();
+</script>
+</body>
+</html>

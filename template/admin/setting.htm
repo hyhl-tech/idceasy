@@ -1,0 +1,94 @@
+{include header}
+<div class="adm-head"><div><h1>系统设置</h1><p>修改后即时生效，部分设置需要重新登录或清除缓存。</p></div></div>
+
+<div class="tabs">
+  {loop $tabs as $key => $t}
+  <a class="{if $key == $tab}active{/if}" href="{admin_url('/settings', ['tab' => $key])}">{$t.title}</a>
+  {/loop}
+</div>
+
+<div class="grid-2" style="grid-template-columns:1.5fr 1fr;align-items:start">
+  <div class="card">
+    <div class="card-title"><h3>{$tabTitle}</h3><span class="small muted">配置项 {$tab}</span></div>
+    <form method="post" action="{admin_url('/settings', ['tab' => $tab])}">
+      {csrf}
+      {loop $fields as $field}
+      <div class="form-row">
+        <label>{$field.label}</label>
+        {if $field.type == 'select'}
+        <select name="{$field.name}">
+          {loop $field.options as $val => $label}
+          <option value="{$val}" {if arr_get($values, $field.name) == $val}selected{/if}>{$label}</option>
+          {/loop}
+        </select>
+        {elseif $field.type == 'textarea'}
+        <textarea name="{$field.name}" rows="3">{arr_get($values, $field.name)}</textarea>
+        {elseif $field.type == 'password'}
+        <input type="password" name="{$field.name}" placeholder="已保存，留空不修改" autocomplete="new-password">
+        {elseif $field.type == 'checkbox'}
+        <label class="check"><input type="checkbox" name="{$field.name}" value="1" {if arr_get($values, $field.name) == '1'}checked{/if}> 开启</label>
+        {elseif $field.type == 'number'}
+        <input type="number" name="{$field.name}" value="{arr_get($values, $field.name)}">
+        {else}
+        <input type="text" name="{$field.name}" value="{arr_get($values, $field.name)}" {if $field.readonly}readonly{/if}>
+        {/if}
+        {if $field.help}<div class="form-help">{$field.help}</div>{/if}
+      </div>
+      {/loop}
+      <div class="form-actions"><button class="btn btn-primary" type="submit">保存设置</button></div>
+    </form>
+  </div>
+
+  <div>
+    {if $tab == 'mail'}
+    <div class="card">
+      <div class="card-title"><h3>发送测试邮件</h3></div>
+      <form method="post" action="{admin_url('/settings', ['tab' => 'mail'])}">
+        {csrf}<input type="hidden" name="action" value="test_mail">
+        <div class="form-row"><label>收件邮箱</label><input type="email" name="to" value="{$admin.email}" required></div>
+        <button class="btn btn-sm btn-primary" type="submit">发送测试</button>
+      </form>
+      <div class="form-help mt-2">使用原生 SMTP，支持 SSL / STARTTLS 与 AUTH LOGIN。发送失败请查看 data/logs/mail-*.log。</div>
+    </div>
+    {/if}
+
+    {if $tab == 'api'}
+    <div class="card">
+      <div class="card-title"><h3>定时任务</h3></div>
+      <p class="small muted">建议每分钟执行一次，用于生成续费账单、暂停欠费、发送邮件队列、同步域名。</p>
+      <div class="mono pre-wrap" style="background:#f9fafb;border:1px solid var(--line);border-radius:9px;padding:10px;font-size:12px">{$cronUrl}</div>
+      <div class="flex mt-2">
+        <button class="btn btn-sm" type="button" data-copy="{$cronUrl}">复制地址</button>
+        <form method="post" action="{admin_url('/settings', ['tab' => 'api'])}" data-confirm="重置后旧地址立即失效，确定继续？">
+          {csrf}<input type="hidden" name="action" value="regen_cron">
+          <button class="btn btn-sm btn-danger" type="submit">重置令牌</button>
+        </form>
+      </div>
+    </div>
+    <div class="card mt-2">
+      <div class="card-title"><h3>WHMCS 对接</h3></div>
+      <p class="small muted" style="margin:0">API 地址：<code>{abs_url('/api/whmcs')}</code><br>认证方式：identifier / secret，响应格式 JSON。支持客户、订单、账单、域名、工单与模块操作。</p>
+    </div>
+    <div class="card mt-2">
+      <div class="card-title"><h3>魔方财务桥接</h3></div>
+      <p class="small muted" style="margin:0">API 地址：<code>{abs_url('/api/cube')}</code><br>使用 X-ICE-KEY 请求头认证，可选 HMAC 签名。详见 integration/cubecp。</p>
+    </div>
+    {/if}
+
+    <div class="card {if $tab != 'mail' && $tab != 'api'}mt-0{else}mt-2{/if}">
+      <div class="card-title"><h3>管理员账户</h3></div>
+      <form method="post" action="{admin_url('/settings', ['tab' => 'account'])}">
+        {csrf}<input type="hidden" name="action" value="admin_password">
+        <div class="form-row"><label>当前密码</label><input type="password" name="old_password" required autocomplete="current-password"></div>
+        <div class="form-row"><label>新密码</label><input type="password" name="new_password" required minlength="8" autocomplete="new-password"></div>
+        <div class="form-row"><label>确认新密码</label><input type="password" name="new_password2" required minlength="8" autocomplete="new-password"></div>
+        <button class="btn btn-sm btn-primary" type="submit">修改密码</button>
+      </form>
+    </div>
+
+    <div class="alert info mt-2" style="margin-bottom:0">
+      提示：修改站点地址后，请同步检查支付网关回调与 <code>config/database.php</code> 的可写权限。
+    </div>
+  </div>
+</div>
+{include footer}

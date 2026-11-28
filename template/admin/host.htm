@@ -1,0 +1,99 @@
+{include header}
+<div class="adm-head">
+  <div>
+    <h1>{$host.domain} <span class="badge {status_class($host.status)}" style="vertical-align:middle">{status_text($host.status)}</span></h1>
+    <p>客户 <a href="{admin_url('/client/' . $user.id)}">{$user.email}</a> · {$product.name} · 到期 {$host.next_due}</p>
+  </div>
+  <a class="btn" href="{admin_url('/hosts')}">返回列表</a>
+</div>
+<div class="grid-2" style="grid-template-columns:1.5fr 1fr">
+  <div>
+    <div class="card">
+      <div class="card-title"><h3>服务信息</h3></div>
+      <div class="kv small" style="display:grid;grid-template-columns:110px 1fr;gap:8px 12px">
+        <span class="muted">服务 ID</span><span>{$host.id}</span>
+        <span class="muted">产品</span><span>{$product.name}（{$product.type}）</span>
+        <span class="muted">计费周期</span><span>{cycle_text($host.cycle)}</span>
+        <span class="muted">开通模块</span><span>{$host.module}</span>
+        <span class="muted">服务器</span><span>{if $server}{$server.name}（{$server.host}）{else}-{/if}</span>
+        <span class="muted">远程 ID</span><span>{$host.remote_id}</span>
+        <span class="muted">IP</span><span>{$host.ip}</span>
+        <span class="muted">用户名</span><span>{$host.username}</span>
+        <span class="muted">密码</span><span><code>{$plainPassword}</code></span>
+        <span class="muted">下次到期</span><span>{$host.next_due}</span>
+        <span class="muted">创建时间</span><span>{$host.created_at}</span>
+      </div>
+    </div>
+
+    <div class="card mt-2">
+      <div class="card-title"><h3>快捷操作</h3></div>
+      <div class="grid-3">
+        <form method="post" action="{admin_url('/host/' . $host.id . '/action')}">
+          {csrf}<input type="hidden" name="action" value="provision">
+          <button class="btn btn-sm btn-block" type="submit">重新开通</button>
+        </form>
+        <form method="post" action="{admin_url('/host/' . $host.id . '/action')}">
+          {csrf}<input type="hidden" name="action" value="suspend">
+          <button class="btn btn-sm btn-block" type="submit">暂停</button>
+        </form>
+        <form method="post" action="{admin_url('/host/' . $host.id . '/action')}">
+          {csrf}<input type="hidden" name="action" value="unsuspend">
+          <button class="btn btn-sm btn-block" type="submit">解除暂停</button>
+        </form>
+        <form method="post" action="{admin_url('/host/' . $host.id . '/action')}">
+          {csrf}<input type="hidden" name="action" value="activate">
+          <button class="btn btn-sm btn-block" type="submit">标记已开通</button>
+        </form>
+        <form method="post" action="{admin_url('/host/' . $host.id . '/action')}">
+          {csrf}<input type="hidden" name="action" value="login">
+          <button class="btn btn-sm btn-block" type="submit">面板登录</button>
+        </form>
+        <form method="post" action="{admin_url('/host/' . $host.id . '/action')}" data-confirm="终止服务会调用删除接口，不可恢复，确定继续？">
+          {csrf}<input type="hidden" name="action" value="terminate">
+          <button class="btn btn-sm btn-danger btn-block" type="submit">终止服务</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card mt-2">
+      <div class="card-title"><h3>修改密码</h3></div>
+      <form method="post" action="{admin_url('/host/' . $host.id . '/action')}" class="flex">
+        {csrf}<input type="hidden" name="action" value="password">
+        <input type="text" name="password" placeholder="至少 8 位" minlength="8" required>
+        <button class="btn btn-sm btn-primary" type="submit">更新</button>
+      </form>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <div class="card-title"><h3>资源用量</h3></div>
+      {if $usage && $usage.ok}
+      <div class="kv small" style="display:grid;grid-template-columns:80px 1fr;gap:8px 10px">
+        <span class="muted">磁盘</span><span>{if $usage.disk}{format_bytes($usage.disk.used)} / {format_bytes($usage.disk.limit)}{else}-{/if}</span>
+        <span class="muted">流量</span><span>{if $usage.bandwidth}{format_bytes($usage.bandwidth.used)} / {format_bytes($usage.bandwidth.limit)}{else}-{/if}</span>
+      </div>
+      {else}
+      <p class="small muted" style="margin:0">{if $usage && $usage.error}{$usage.error}{else}暂无用量数据{/if}</p>
+      {/if}
+    </div>
+    <div class="card mt-2">
+      <div class="card-title"><h3>续费</h3></div>
+      <form method="post" action="{admin_url('/host/' . $host.id . '/action')}">
+        {csrf}<input type="hidden" name="action" value="renew">
+        <div class="form-row"><label>续费周期</label>
+          <select name="cycle">
+            {loop cycles() as $c}
+            <option value="{$c}" {if $host.cycle == $c}selected{/if}>{cycle_text($c)}</option>
+            {/loop}
+          </select>
+        </div>
+        <button class="btn btn-primary btn-sm" type="submit">延长到期时间</button>
+      </form>
+    </div>
+    {if $host.notes}
+    <div class="card mt-2"><div class="card-title"><h3>备注</h3></div><p class="small muted" style="margin:0">{$host.notes}</p></div>
+    {/if}
+  </div>
+</div>
+{include footer}

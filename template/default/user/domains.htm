@@ -1,0 +1,33 @@
+{include header}
+<div class="container">
+  <div class="uc-layout">
+    {include user/sidebar}
+    <main class="uc-main">
+      <div class="page-head">
+        <div><h1>我的域名</h1><p class="small muted" style="margin:2px 0 0">共 {$list.total} 个域名</p></div>
+        <a class="btn btn-primary btn-sm" href="{url('/domain')}">注册新域名</a>
+      </div>
+      <div class="panel" style="padding:0;overflow:hidden">
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>域名</th><th>状态</th><th>到期时间</th><th>自动续费</th><th class="actions">操作</th></tr></thead>
+            <tbody>
+              {loop $list.data as $d}
+              <tr>
+                <td><a href="{url('/user/domain/' . $d.id)}" style="font-weight:600">{$d.domain}</a></td>
+                <td><span class="badge {status_class($d.status)}">{status_text($d.status)}</span></td>
+                <td>{date('Y-m-d', strtotime($d.expire_date))}</td>
+                <td>{if $d.auto_renew}<span class="badge ok">开启</span>{else}<span class="badge muted">关闭</span>{/if}</td>
+                <td class="actions"><a href="{url('/user/domain/' . $d.id)}">管理</a></td>
+              </tr>
+              {/loop}
+              {if !$list.data}<tr><td colspan="5" class="center muted" style="padding:36px">还没有域名，<a href="{url('/domain')}">去注册一个</a></td></tr>{/if}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {paginate_links($list, url('/user/domains'))}
+    </main>
+  </div>
+</div>
+{include footer}

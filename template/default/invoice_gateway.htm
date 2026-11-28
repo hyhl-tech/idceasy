@@ -1,0 +1,28 @@
+{include header}
+<section class="section">
+  <div class="container" style="max-width:680px">
+    <div class="card">
+      <div class="flex-between mb-2">
+        <h1 style="font-size:22px;margin:0">完成支付</h1>
+        <span class="badge blue">{$gateway}</span>
+      </div>
+      <p class="muted">账单 {$invoice.invoice_no} · 应付 {money($invoice.total - $invoice.paid)}</p>
+      {if ($result.type ?? '') == 'html' || ($result.type ?? '') == 'form'}
+      <div class="gateway-html">{:($result.html)}</div>
+      {else}
+      <div class="card card-flat" style="background:#f9fafb;text-align:center;padding:26px">
+        <p class="small muted" style="margin-bottom:10px">请使用对应 App 扫描或打开以下支付链接</p>
+        <div class="mono" style="word-break:break-all;font-size:13px;background:#fff;border:1px solid var(--line);border-radius:9px;padding:12px">{$result.qr}</div>
+        <div class="mt-2 flex" style="justify-content:center">
+          <a class="btn btn-primary" href="{$result.qr}" target="_blank" rel="noopener">打开支付链接</a>
+          <button class="btn btn-ghost" type="button" data-copy="{$result.qr}">复制</button>
+        </div>
+        {if $result.url}<div class="mt-2"><a class="small" href="{$result.url}" target="_blank">继续前往支付页面</a></div>{/if}
+      </div>
+      {/if}
+      <div class="alert info mt-3" style="margin-bottom:0">支付完成后系统会自动入账。若长时间未更新，请回到账单页刷新或联系客服。</div>
+      <div class="mt-2"><a class="small" href="{url('/invoice/' . $invoice.id)}">返回账单</a></div>
+    </div>
+  </div>
+</section>
+{include footer}

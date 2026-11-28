@@ -1,0 +1,36 @@
+{include header}
+<section class="section" style="padding-bottom:20px">
+  <div class="container">
+    <div class="page-head"><h1>我的账单</h1><span class="small muted">共 {$list.total} 张</span></div>
+    <div class="tabs">
+      <a class="{if !$status}active{/if}" href="{url('/invoice')}">全部</a>
+      <a class="{if $status == 'unpaid'}active{/if}" href="{url('/invoice', ['status' => 'unpaid'])}">未支付</a>
+      <a class="{if $status == 'paid'}active{/if}" href="{url('/invoice', ['status' => 'paid'])}">已支付</a>
+      <a class="{if $status == 'refunded'}active{/if}" href="{url('/invoice', ['status' => 'refunded'])}">已退款</a>
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>账单号</th><th class="num">金额</th><th class="num">已付</th><th>状态</th><th>到期时间</th><th>创建时间</th><th class="actions">操作</th></tr></thead>
+        <tbody>
+          {loop $list.data as $i}
+          <tr>
+            <td><a href="{url('/invoice/' . $i.id)}">{$i.invoice_no}</a></td>
+            <td class="num">{money($i.total)}</td>
+            <td class="num">{money($i.paid)}</td>
+            <td><span class="badge {status_class($i.status)}">{status_text($i.status)}</span></td>
+            <td>{date('Y-m-d', strtotime($i.due_at))}</td>
+            <td>{date('Y-m-d', strtotime($i.created_at))}</td>
+            <td class="actions">
+              <a href="{url('/invoice/' . $i.id)}">详情</a>
+              {if $i.status == 'unpaid'}<a href="{url('/invoice/' . $i.id . '/pay')}">支付</a>{/if}
+            </td>
+          </tr>
+          {/loop}
+          {if !$list.data}<tr><td colspan="7" class="center muted" style="padding:36px">暂无账单</td></tr>{/if}
+        </tbody>
+      </table>
+    </div>
+    {paginate_links($list, url('/invoice'))}
+  </div>
+</section>
+{include footer}

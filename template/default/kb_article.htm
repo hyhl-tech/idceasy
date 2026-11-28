@@ -1,0 +1,25 @@
+{include header}
+<section class="section">
+  <div class="container" style="max-width:900px">
+    <div class="small muted" style="margin-bottom:10px">
+      <a href="{url('/kb')}">帮助中心</a> / {if $category}<a href="{url('/kb/' . $category.id)}">{$category.name}</a> / {/if}{$article.title}
+    </div>
+    <div class="grid" style="grid-template-columns:1fr 280px;gap:24px;align-items:start">
+      <div class="card">
+        <h1 style="font-size:26px">{$article.title}</h1>
+        <p class="small muted">{date('Y-m-d', strtotime($article.created_at))} · {$article.views} 次阅读</p>
+        <div style="line-height:1.95;margin-top:16px">{:($article.content)}</div>
+      </div>
+      <div class="card">
+        <h3 style="font-size:15px">相关文章</h3>
+        <ul class="feature-list" style="margin-top:10px">
+          {loop $related as $r}
+          <li><a href="{url('/kb/article/' . $r.id)}">{$r.title}</a></li>
+          {/loop}
+        </ul>
+        <a class="btn btn-ghost btn-block mt-2" href="{url('/user/ticket/new')}">没有解决？提交工单</a>
+      </div>
+    </div>
+  </div>
+</section>
+{include footer}

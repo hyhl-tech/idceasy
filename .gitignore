@@ -1,0 +1,15 @@
+/config/database.php
+/install.lock.php
+/data/cache/views/*.php
+/data/logs/*.log
+/data/backups/*
+!/data/cache/.gitkeep
+!/data/logs/.gitkeep
+!/data/backups/.gitkeep
+.DS_Store
+Thumbs.db
+*.tmp
+
+# 构建产物
+/idceasy.zip
+*.zip

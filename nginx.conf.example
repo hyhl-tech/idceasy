@@ -1,0 +1,46 @@
+# idceasy Nginx 示例配置
+# 将 root 指向项目根目录（与 WordPress 类似，不要只指向 public）
+server {
+    listen 80;
+    server_name idceasy.site www.idceasy.site;
+    root /var/www/idceasy;
+    index index.php;
+
+    charset utf-8;
+    client_max_body_size 20m;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_pass unix:/run/php/php8.1-fpm.sock;
+        fastcgi_read_timeout 60s;
+    }
+
+    # 禁止访问敏感目录与文件
+    location ~ ^/(config|data|core|app)/ {
+        deny all;
+        return 404;
+    }
+    location ~ /\.(?!well-known) {
+        deny all;
+    }
+    location ~* \.(sql|log|lock|bak|ini)$ {
+        deny all;
+    }
+
+    # 静态资源缓存
+    location ~* ^/public/assets/.*\.(css|js|png|jpg|jpeg|gif|svg|webp|ico|woff2?)$ {
+        expires 30d;
+        access_log off;
+        add_header Cache-Control "public";
+    }
+
+    # HTTPS 建议
+    # listen 443 ssl http2;
+    # ssl_certificate /etc/letsencrypt/live/idceasy.site/fullchain.pem;
+    # ssl_certificate_key /etc/letsencrypt/live/idceasy.site/privkey.pem;
+}

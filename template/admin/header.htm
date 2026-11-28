@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{if !empty($title)}{$title} - {/if}管理后台</title>
+<link rel="stylesheet" href="{asset('css/admin.css')}">
+</head>
+<body>
+<div class="admin">
+  <aside class="sidebar">
+    <div class="side-brand">
+      <span class="mark">i</span>
+      <span>{$siteName}<small>ADMIN CONSOLE</small></span>
+    </div>
+    {loop admin_menu() as $group}
+      {if $group.items}
+      <div class="side-group">{$group.title}</div>
+      <nav class="side-nav">
+        {loop $group.items as $item}
+        {if can($item.perm)}
+        <a href="{$item.url}">{$item.title}</a>
+        {/if}
+        {/loop}
+      </nav>
+      {/if}
+    {/loop}
+    <div class="side-group">账户</div>
+    <nav class="side-nav">
+      <a href="{url('/')}" target="_blank">查看前台</a>
+      <a href="{admin_url('/logout')}">退出登录</a>
+    </nav>
+  </aside>
+
+  <div>
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="btn btn-sm" type="button" data-sidebar-toggle style="display:none" id="sidebarBtn">菜单</button>
+        <span class="crumb">{if !empty($title)}{$title}{else}管理后台{/if}</span>
+      </div>
+      <div class="topbar-right">
+        <a class="small" href="{url('/')}" target="_blank">前台</a>
+        <span class="muted">|</span>
+        <div class="avatar">{first_char($admin.name ?: $admin.username)}</div>
+        <span>{$admin.name ?: $admin.username}</span>
+        <a class="small" href="{admin_url('/logout')}">退出</a>
+      </div>
+    </div>
+    <div class="adm-content">
+    {if !empty($flashOk)}<div class="alert ok">{$flashOk}</div>{/if}
+    {if !empty($flashErr)}<div class="alert error">{$flashErr}</div>{/if}

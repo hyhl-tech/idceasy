@@ -1,0 +1,47 @@
+{include header}
+<div class="adm-head">
+  <div><h1>{if $server}编辑服务器{else}添加服务器{/if}</h1><p>凭据使用 AES-256-GCM 加密存储，页面不会回显已保存的密码。</p></div>
+  <a class="btn" href="{admin_url('/servers')}">返回列表</a>
+</div>
+<div class="card" style="max-width:900px">
+  <form method="post" action="{if $server}{admin_url('/server/' . $server.id . '/edit')}{else}{admin_url('/server/create')}{/if}">
+    {csrf}
+    <div class="form-grid">
+      <div class="form-row"><label>名称 <span style="color:var(--danger)">*</span></label><input type="text" name="name" value="{if $server}{$server.name}{/if}" required></div>
+      <div class="form-row"><label>模块 <span style="color:var(--danger)">*</span></label>
+        <select name="module">
+          {loop $modules as $id => $m}
+          <option value="{$id}" {if $server && $server.module == $id}selected{/if}>{$m.title}</option>
+          {/loop}
+        </select>
+      </div>
+      <div class="form-row"><label>分组</label>
+        <select name="group_id">
+          <option value="0">未分组</option>
+          {loop $groups as $g}
+          <option value="{$g.id}" {if $server && $server.group_id == $g.id}selected{/if}>{$g.name}</option>
+          {/loop}
+        </select>
+      </div>
+      <div class="form-row"><label>主机地址</label><input type="text" name="host" value="{if $server}{$server.host}{/if}" placeholder="panel.example.com"></div>
+      <div class="form-row"><label>端口</label><input type="number" name="port" value="{if $server}{$server.port}{/if}" placeholder="2087"></div>
+      <div class="form-row"><label>用户名</label><input type="text" name="username" value="{if $server}{$server.username}{/if}"></div>
+      <div class="form-row"><label>密码 / API Key</label><input type="password" name="password" placeholder="留空不修改">
+        <div class="form-help">部分模块使用 API Key 作为密码。</div>
+      </div>
+      <div class="form-row"><label>附加 API Key</label><input type="text" name="api_key" placeholder="留空不修改">
+        <div class="form-help">用于 Virtualizor / SolusVM 等双凭据模块。</div>
+      </div>
+      <div class="form-row"><label>最大账户数</label><input type="number" name="max_accounts" value="{if $server}{$server.max_accounts}{else}0{/if}">
+        <div class="form-help">0 表示不限制，达到上限后不再分配新服务。</div>
+      </div>
+      <div class="form-row"><label>备注</label><textarea name="notes" rows="2">{if $server}{$server.notes}{/if}</textarea></div>
+    </div>
+    <div class="flex mt-2">
+      <label class="check"><input type="checkbox" name="secure" value="1" {if !$server || $server.secure}checked{/if}> 使用 HTTPS</label>
+      <label class="check"><input type="checkbox" name="status" value="1" {if !$server || $server.status}checked{/if}> 启用</label>
+    </div>
+    <div class="form-actions"><button class="btn btn-primary" type="submit">保存服务器</button><a class="btn" href="{admin_url('/servers')}">取消</a></div>
+  </form>
+</div>
+{include footer}

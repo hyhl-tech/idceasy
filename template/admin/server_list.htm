@@ -1,0 +1,38 @@
+{include header}
+<div class="adm-head">
+  <div><h1>服务器节点</h1><p>{count($servers)} 个节点，共 {count($modules)} 个可用模块</p></div>
+  <div class="flex">
+    <a class="btn" href="{admin_url('/data/server_group')}">管理分组</a>
+    <a class="btn btn-primary" href="{admin_url('/server/create')}">添加服务器</a>
+  </div>
+</div>
+<div class="card" style="padding:0;overflow:hidden">
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>名称</th><th>模块</th><th>地址</th><th>分组</th><th>负载</th><th>状态</th><th class="actions">操作</th></tr></thead>
+      <tbody>
+        {loop $servers as $s}
+        <tr>
+          <td><strong>{$s.name}</strong></td>
+          <td><span class="badge muted">{$s.module_title}</span></td>
+          <td class="small mono">{$s.host}{if $s.port}:{$s.port}{/if}</td>
+          <td class="small">{if $s.group}{$s.group.name}{else}-{/if}</td>
+          <td><span class="badge {if $s.max_accounts > 0 && $s.load >= $s.max_accounts}danger{else}ok{/if}">{$s.load}{if $s.max_accounts > 0} / {$s.max_accounts}{/if}</span></td>
+          <td><span class="badge {if $s.status}ok{else}muted{/if}">{if $s.status}在线{else}停用{/if}</span></td>
+          <td class="actions">
+            <form method="post" action="{admin_url('/server/' . $s.id . '/test')}" style="display:inline">
+              {csrf}<button class="btn btn-sm" type="submit">测试</button>
+            </form>
+            <a href="{admin_url('/server/' . $s.id . '/edit')}">编辑</a>
+            <form method="post" action="{admin_url('/server/' . $s.id . '/delete')}" style="display:inline" data-confirm="确定删除该服务器？">
+              {csrf}<button class="btn btn-sm btn-danger" type="submit" style="margin-left:8px">删除</button>
+            </form>
+          </td>
+        </tr>
+        {/loop}
+        {if !$servers}<tr><td colspan="7" class="empty">暂无服务器节点。添加后即可自动开通对应模块的产品。</td></tr>{/if}
+      </tbody>
+    </table>
+  </div>
+</div>
+{include footer}

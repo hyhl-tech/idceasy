@@ -1,0 +1,63 @@
+{include header}
+<div class="container">
+  <div class="uc-layout">
+    {include user/sidebar}
+    <main class="uc-main">
+      <div class="page-head"><h1>地址簿</h1><span class="small muted">用于域名注册联系人</span></div>
+      <div class="grid" style="grid-template-columns:1fr 1.1fr;gap:18px;align-items:start">
+        <div>
+          {loop $list as $a}
+          <div class="panel" style="margin-bottom:12px">
+            <div class="flex-between">
+              <div>
+                <strong style="color:var(--ink)">{$a.label}</strong>
+                {if $a.is_default}<span class="badge ok" style="margin-left:6px">默认</span>{/if}
+              </div>
+              <div class="flex">
+                <a class="btn btn-sm btn-ghost" href="{url('/user/addresses', ['edit' => $a.id])}">编辑</a>
+                <form method="post" action="{url('/user/address/delete')}" data-confirm="确定删除该地址？">
+                  {csrf}<input type="hidden" name="id" value="{$a.id}">
+                  <button class="btn btn-sm btn-danger" type="submit">删除</button>
+                </form>
+              </div>
+            </div>
+            <div class="small muted" style="margin-top:6px">
+              {$a.firstname} {$a.lastname} · {$a.company}<br>
+              {$a.address1} {$a.address2} {$a.city} {$a.state} {$a.postcode} {$a.country}<br>
+              {$a.email} · {$a.phone}
+            </div>
+          </div>
+          {/loop}
+          {if !$list}<div class="panel"><p class="muted" style="margin:0">还没有地址，请在右侧添加。</p></div>{/if}
+        </div>
+
+        <div class="panel">
+          <div class="panel-title"><h3>{if $edit}编辑地址{else}新增地址{/if}</h3></div>
+          <form method="post" action="{url('/user/address/save')}">
+            {csrf}
+            <input type="hidden" name="id" value="{if $edit}{$edit.id}{/if}">
+            <div class="form-row"><label>标签</label><input type="text" name="label" value="{if $edit}{$edit.label}{else}默认地址{/if}"></div>
+            <div class="form-grid">
+              <div class="form-row"><label>名</label><input type="text" name="firstname" value="{if $edit}{$edit.firstname}{/if}" required></div>
+              <div class="form-row"><label>姓</label><input type="text" name="lastname" value="{if $edit}{$edit.lastname}{/if}"></div>
+              <div class="form-row"><label>公司</label><input type="text" name="company" value="{if $edit}{$edit.company}{/if}"></div>
+              <div class="form-row"><label>邮箱</label><input type="email" name="email" value="{if $edit}{$edit.email}{/if}"></div>
+              <div class="form-row"><label>电话</label><input type="text" name="phone" value="{if $edit}{$edit.phone}{/if}" placeholder="+8613800000000"></div>
+              <div class="form-row"><label>国家代码</label><input type="text" name="country" value="{if $edit}{$edit.country}{else}CN{/if}" maxlength="10"></div>
+            </div>
+            <div class="form-row"><label>地址</label><input type="text" name="address1" value="{if $edit}{$edit.address1}{/if}" required></div>
+            <div class="form-row"><label>地址 2</label><input type="text" name="address2" value="{if $edit}{$edit.address2}{/if}"></div>
+            <div class="form-grid">
+              <div class="form-row"><label>城市</label><input type="text" name="city" value="{if $edit}{$edit.city}{/if}"></div>
+              <div class="form-row"><label>省/州</label><input type="text" name="state" value="{if $edit}{$edit.state}{/if}"></div>
+              <div class="form-row"><label>邮编</label><input type="text" name="postcode" value="{if $edit}{$edit.postcode}{/if}"></div>
+            </div>
+            <label class="check"><input type="checkbox" name="is_default" value="1" {if $edit && $edit.is_default}checked{/if}> 设为默认地址</label>
+            <button class="btn btn-primary mt-2" type="submit">保存地址</button>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+{include footer}

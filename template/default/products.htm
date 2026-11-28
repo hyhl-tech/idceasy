@@ -1,0 +1,41 @@
+{include header}
+<section class="section" style="padding-bottom:24px">
+  <div class="container">
+    <div class="section-head" style="margin-bottom:18px">
+      <div>
+        <span class="eyebrow">Products</span>
+        <h2>产品与服务</h2>
+        <p>所有产品均支持在线下单、自动开通与自助续费。</p>
+      </div>
+    </div>
+    <div class="tabs">
+      <a class="{if !$groupId}active{/if}" href="{url('/products')}">全部</a>
+      {loop $groups as $g}
+      <a class="{if $groupId == $g.id}active{/if}" href="{url('/products', ['group' => $g.id])}">{$g.name}</a>
+      {/loop}
+    </div>
+    {if $currentGroup}
+    <p class="muted" style="margin-bottom:20px">{$currentGroup.description}</p>
+    {/if}
+    <div class="grid grid-3">
+      {loop $products as $p}
+      <article class="product-card">
+        <div class="flex-between">
+          <h3>{$p.name}</h3>
+          <span class="badge muted">{cycle_text($p.price_cycle)}起</span>
+        </div>
+        <p class="desc">{strip_tags($p.description)}</p>
+        <div class="price-line">
+          <span class="amount">{money($p.price_from)}</span>
+          <span class="unit">/ {cycle_text($p.price_cycle)}</span>
+        </div>
+        <a class="btn btn-primary btn-block" href="{url('/product/' . $p.slug)}">配置并购买</a>
+      </article>
+      {/loop}
+      {if !$products}
+      <div class="card" style="grid-column:1/-1"><p class="muted" style="margin:0">该分组暂无上架产品。</p></div>
+      {/if}
+    </div>
+  </div>
+</section>
+{include footer}

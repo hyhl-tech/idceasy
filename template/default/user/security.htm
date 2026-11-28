@@ -1,0 +1,50 @@
+{include header}
+<div class="container">
+  <div class="uc-layout">
+    {include user/sidebar}
+    <main class="uc-main">
+      <div class="page-head"><h1>安全设置</h1></div>
+      <div class="grid grid-2">
+        <div class="panel">
+          <div class="panel-title"><h3>账户安全</h3></div>
+          <div class="kv">
+            <span class="k">邮箱</span><span class="v">{$profile.email} {if $profile.email_verified}<span class="badge ok">已验证</span>{else}<span class="badge warn">未验证</span>{/if}</span>
+            <span class="k">注册时间</span><span class="v">{$profile.created_at}</span>
+            <span class="k">最后登录</span><span class="v">{$profile.last_login_at} · {$profile.last_login_ip}</span>
+            <span class="k">账户状态</span><span class="v">{if $profile.status}正常{else}禁用{/if}</span>
+          </div>
+          <div class="flex mt-3">
+            <a class="btn btn-ghost btn-sm" href="{url('/user/password')}">修改密码</a>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-title"><h3>API 密钥</h3></div>
+          <p class="small muted">用于调用开放 API（/api/v1），请勿泄露。重置后旧密钥立即失效。</p>
+          <div class="mono" style="background:#f9fafb;border:1px solid var(--line);border-radius:9px;padding:10px;word-break:break-all;font-size:12.5px">{$profile.api_key}</div>
+          <div class="flex mt-2">
+            <button class="btn btn-ghost btn-sm" type="button" data-copy="{$profile.api_key}">复制</button>
+            <form method="post" action="{url('/user/api')}" data-confirm="重置后旧密钥立即失效，确定继续？">
+              {csrf}<button class="btn btn-danger btn-sm" type="submit">重置密钥</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel mt-2">
+        <div class="panel-title"><h3>最近登录记录</h3></div>
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>时间</th><th>IP</th><th>浏览器</th></tr></thead>
+            <tbody>
+              {loop $logs as $log}
+              <tr><td>{$log.created_at}</td><td>{$log.ip}</td><td class="small muted">{$log.ua}</td></tr>
+              {/loop}
+              {if !$logs}<tr><td colspan="3" class="muted center">暂无记录</td></tr>{/if}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+{include footer}

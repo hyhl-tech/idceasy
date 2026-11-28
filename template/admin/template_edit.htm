@@ -1,0 +1,25 @@
+{include header}
+<div class="adm-head">
+  <div><h1>编辑模板</h1><p class="mono">{$theme}/{$file}</p></div>
+  <div class="flex">
+    <a class="btn" href="{admin_url('/templates', ['theme' => $theme])}">返回文件列表</a>
+    <form method="post" action="{admin_url('/template/delete')}" data-confirm="删除前会自动备份，确定继续？">
+      {csrf}<input type="hidden" name="theme" value="{$theme}"><input type="hidden" name="file" value="{$file}">
+      <button class="btn btn-danger" type="submit">删除文件</button>
+    </form>
+  </div>
+</div>
+<div class="card" style="padding:16px">
+  <form method="post" action="{admin_url('/template/save')}">
+    {csrf}
+    <input type="hidden" name="theme" value="{$theme}">
+    <input type="hidden" name="file" value="{$file}">
+    <textarea class="editor" name="content" spellcheck="false">{$content}</textarea>
+    <div class="form-actions" style="border-top:0;padding-top:12px">
+      <button class="btn btn-primary" type="submit">保存模板</button>
+      <a class="btn" href="{admin_url('/templates', ['theme' => $theme])}">取消</a>
+      <span class="small muted" style="margin-left:auto">保存时会自动备份到 data/backups/templates</span>
+    </div>
+  </form>
+</div>
+{include footer}

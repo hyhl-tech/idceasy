@@ -1,0 +1,39 @@
+{include header}
+<div class="adm-head">
+  <div><h1>产品管理</h1><p>{count($products)} 个产品，{count($groups)} 个分组</p></div>
+  <div class="flex">
+    <a class="btn" href="{admin_url('/data/product_group')}">管理分组</a>
+    <a class="btn btn-primary" href="{admin_url('/product/create')}">新建产品</a>
+  </div>
+</div>
+<div class="card" style="padding:0;overflow:hidden">
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>ID</th><th>产品</th><th>分组</th><th>类型</th><th>模块</th><th>起价</th><th>服务数</th><th>状态</th><th class="actions">操作</th></tr></thead>
+      <tbody>
+        {loop $products as $p}
+        <tr>
+          <td>{$p.id}</td>
+          <td><strong>{$p.name}</strong><div class="small muted">{$p.slug}</div></td>
+          <td class="small">{$p.group.name}</td>
+          <td><span class="badge muted">{$p.type}</span></td>
+          <td class="small">{$p.module}</td>
+          <td class="num">{if $p.pricing}{money(arr_get($p.pricing[0], 'price'))}{else}-{/if}</td>
+          <td>{$p.hosts}</td>
+          <td><span class="badge {if $p.status}ok{else}muted{/if}">{if $p.status}上架{else}下架{/if}</span></td>
+          <td class="actions">
+            <a href="{admin_url('/product/' . $p.id . '/pricing')}">价格</a>
+            <a href="{admin_url('/product/' . $p.id . '/options')}">选项</a>
+            <a href="{admin_url('/product/' . $p.id . '/edit')}">编辑</a>
+            <form method="post" action="{admin_url('/product/' . $p.id . '/delete')}" style="display:inline" data-confirm="确定删除该产品？">
+              {csrf}<button class="btn btn-sm btn-danger" type="submit" style="margin-left:8px">删除</button>
+            </form>
+          </td>
+        </tr>
+        {/loop}
+        {if !$products}<tr><td colspan="9" class="empty">暂无产品，先创建一个。</td></tr>{/if}
+      </tbody>
+    </table>
+  </div>
+</div>
+{include footer}

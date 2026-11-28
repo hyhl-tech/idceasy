@@ -1,0 +1,68 @@
+{include header}
+<div class="container">
+  <div class="uc-layout">
+    {include user/sidebar}
+    <main class="uc-main">
+      <div class="page-head">
+        <div>
+          <h1>控制台</h1>
+          <p class="small muted" style="margin:2px 0 0">欢迎回来，{$user.name}。账户余额 {money($user.balance)}。</p>
+        </div>
+        <a class="btn btn-primary btn-sm" href="{url('/products')}">购买服务</a>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat"><div class="label">在服主机</div><div class="value">{$stats.hosts}</div></div>
+        <div class="stat"><div class="label">域名</div><div class="value">{$stats.domains}</div></div>
+        <div class="stat"><div class="label">待付金额</div><div class="value">{money($stats.unpaid)}</div></div>
+        <div class="stat"><div class="label">待处理工单</div><div class="value">{$stats.tickets}</div></div>
+      </div>
+
+      <div class="grid grid-2">
+        <div class="panel">
+          <div class="panel-title"><h3>最近账单</h3><a class="small" href="{url('/invoice')}">全部</a></div>
+          {loop $invoices as $i}
+          <div class="flex-between" style="padding:9px 0;border-bottom:1px solid var(--line)">
+            <div>
+              <a href="{url('/invoice/' . $i.id)}" style="font-size:13.5px">{$i.invoice_no}</a>
+              <div class="small muted">{$i.created_at}</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-weight:600;font-size:13.5px">{money($i.total)}</div>
+              <span class="badge {status_class($i.status)}">{status_text($i.status)}</span>
+            </div>
+          </div>
+          {/loop}
+          {if !$invoices}<p class="small muted" style="margin:0">暂无账单。</p>{/if}
+        </div>
+
+        <div class="panel">
+          <div class="panel-title"><h3>最近工单</h3><a class="small" href="{url('/user/tickets')}">全部</a></div>
+          {loop $tickets as $t}
+          <div class="flex-between" style="padding:9px 0;border-bottom:1px solid var(--line)">
+            <div style="min-width:0">
+              <a href="{url('/user/ticket/' . $t.id)}" style="font-size:13.5px">{$t.subject}</a>
+              <div class="small muted">#{$t.id} · {$t.last_reply_at}</div>
+            </div>
+            <span class="badge {status_class($t.status)}">{status_text($t.status)}</span>
+          </div>
+          {/loop}
+          {if !$tickets}<p class="small muted" style="margin:0">暂无工单。</p>{/if}
+        </div>
+      </div>
+
+      {if $announcements}
+      <div class="panel mt-2">
+        <div class="panel-title"><h3>站点公告</h3><a class="small" href="{url('/announcements')}">全部</a></div>
+        {loop $announcements as $a}
+        <div style="padding:8px 0;border-bottom:1px solid var(--line)">
+          <a href="{url('/announcement/' . $a.id)}">{$a.title}</a>
+          <span class="small muted" style="margin-left:8px">{date('Y-m-d', strtotime($a.created_at))}</span>
+        </div>
+        {/loop}
+      </div>
+      {/if}
+    </main>
+  </div>
+</div>
+{include footer}
